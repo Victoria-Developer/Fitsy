@@ -35,7 +35,7 @@ class _HomePagePageState extends State<HomePage> {
               ElevatedButton(
                 onPressed: () {
                   // Send data to recipes screen
-                  context.goNamed('recipes', pathParameters: {"days": "$days"});
+                  context.pushNamed('recipes', pathParameters: {"days": "$days"});
                 },
                 child: const Text('Plan meals'),
               ),
