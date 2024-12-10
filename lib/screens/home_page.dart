@@ -1,8 +1,5 @@
-
 import 'package:flutter/material.dart';
-
-import '../models/meal_plan.dart';
-import '../services/http_request.dart';
+import 'package:go_router/go_router.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key, required this.title});
@@ -10,44 +7,16 @@ class HomePage extends StatefulWidget {
   final String title;
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<HomePage> createState() => _HomePagePageState();
 }
 
-class _HomePageState extends State<HomePage> {
-  late Future<List<MealPlan>> recipesList;
-  int selectedCardId = 0;
+class _HomePagePageState extends State<HomePage> {
+  int days = 1;
 
-  @override
-  void initState() {
-    fetchRecipes();
-    super.initState();
-  }
-
-  void setSelectedCardId(int id) {
+  _setDays(int? days){
     setState(() {
-      selectedCardId = id;
+      this.days = days!;
     });
-  }
-
-  fetchRecipes() async {
-    var prompt = """
-    Give me recipes for 2 days for meal names 'breakfast', 'lunch' and 'dinner'
-    using this JSON schema, replace 'day_id' with day number 
-    starting from number '0' and replace 'meal_name' with an actual 
-    name like 'lunch':
-    {
-        "day_id":{
-              "meal_name":{ 
-                'id':{'type': 'int'},
-                'recipe_name': {'type': 'string'},
-                'recipe':{'type': 'string'},
-                'calories'{'type': 'int'}
-                'usd_price':{'type': 'int'}
-              }
-        }
-    }    
-    """;
-    recipesList = sendGeminiRequest(prompt);
   }
 
   @override
@@ -58,50 +27,36 @@ class _HomePageState extends State<HomePage> {
           title: Text(widget.title),
         ),
         body: Center(
-            child: FutureBuilder<List<MealPlan>>(
-          future: recipesList,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const CircularProgressIndicator();
-            } else if (snapshot.hasData) {
-              return ListView.builder(
-                scrollDirection: Axis.horizontal,
-                physics: const PageScrollPhysics(), // this for snapping
-                itemCount: snapshot.data!.length,
-                itemBuilder: (_, index) {
-                  var data = snapshot.data![index];
-                  return _buildMealPlanCard(data);
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildSettingsWidget(),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  // Send data to recipes screen
+                  context.goNamed('recipes', pathParameters: {"days": "$days"});
                 },
-              );
-            } else {
-              return const Text("No data");
-            }
-          },
-        )));
+                child: const Text('Plan meals'),
+              ),
+            ],
+          ),
+        ));
   }
 
-  SizedBox _buildMealPlanCard(MealPlan mealPlan) {
-    return SizedBox(
-        width: MediaQuery.of(context).size.width,
-        child: Card(
-          child: SingleChildScrollView(child: Column(
-            children: [
-              Text(mealPlan.dayId),
-              Column(
-                  children: mealPlan.meals.entries.map((entry) {
-                    var title = entry.key;
-                    var recipe = entry.value;
-                    return Column(children: [
-                      Text(title),
-                      Text(recipe.recipeName!),
-                      Text(recipe.recipe!),
-                      Text(recipe.calories.toString()),
-                      Text(recipe.price.toString()),
-                      const Divider(height: 50, thickness: 1)
-                    ]);
-                  }).toList())
-            ],
-          ),)
-        ));
+  _buildSettingsWidget() {
+    var daysList = [1, 2, 3, 4, 5, 6, 7];
+    return DropdownButton<int>(
+      value: days,
+      items: daysList.map((int value) {
+        return DropdownMenuItem<int>(
+          value: value,
+          child: Text(value.toString()),
+        );
+      }).toList(),
+      onChanged: (int? value) {
+        _setDays(value);
+      },
+    );
   }
 }
