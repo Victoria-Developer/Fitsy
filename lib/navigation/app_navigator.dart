@@ -1,6 +1,5 @@
-
 import 'package:fitsy/navigation/route.dart';
-import 'package:fitsy/widgets/app_scaffold.dart';
+import 'package:fitsy/widgets/dynamic_bottom_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -35,10 +34,11 @@ class AppNavigator {
                   .firstWhere((route) => route.name == state.topRoute!.name,
                       orElse: () => routes[0])
                   .id;
-              return AppScaffold(
-                  onNavigateToTab: onNavigateToTab,
-                  currentTabId: index,
-                  child: child);
+              return Scaffold(
+                body: child,
+                bottomNavigationBar: DynamicBottomBar(
+                    onNavigateToTab: onNavigateToTab, currentTabId: index),
+              );
             },
             routes: [
               GoRoute(
@@ -71,7 +71,6 @@ class AppNavigator {
   }
 
   void popUntilPath(String routePath) {
-    //final router = GoRouter.of(context);
     final GoRouterDelegate delegate = router.routerDelegate;
     List routeStacks = [...delegate.currentConfiguration.routes];
 
