@@ -45,19 +45,28 @@ class AppNavigator {
                 name: homeRoute.name,
                 path: homeRoute.path,
                 builder: (context, state) => HomePage(
-                    onNavigateToRecipes: (days) {
-                      router.pushNamed(recipesRoute.name,
-                          pathParameters: {"days": "$days"});
+                    onNavigateToRecipes: (days, calories, budget) {
+                      router.pushNamed(recipesRoute.name, pathParameters: {
+                        "days": "$days",
+                        "calories": "$calories",
+                        "budget": "$budget"
+                      });
                       // index = -1;
                     },
                     title: 'Home'),
               ),
               GoRoute(
                 name: recipesRoute.name,
-                path: '${recipesRoute.path}/:days',
+                path: '${recipesRoute.path}/:days/:calories/:budget',
                 builder: (context, state) {
                   int days = int.parse(state.pathParameters['days']!);
-                  return RecipesPage(title: 'Recipes', days: days);
+                  int calories = int.parse(state.pathParameters['calories']!);
+                  int budget = int.parse(state.pathParameters['budget']!);
+                  return RecipesPage(
+                      title: 'Recipes',
+                      days: days,
+                      calories: calories,
+                      budget: budget);
                 },
               ),
               GoRoute(

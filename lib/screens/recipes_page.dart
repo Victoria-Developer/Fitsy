@@ -1,19 +1,21 @@
-
-
 import 'package:flutter/material.dart';
 
 import '../models/meal_plan.dart';
 import '../services/http_request.dart';
 
 class RecipesPage extends StatefulWidget {
-
   const RecipesPage({
     super.key,
-    required this.title, required this.days,
+    required this.title,
+    required this.days,
+    required this.calories,
+    required this.budget,
   });
 
   final String title;
   final int days;
+  final int calories;
+  final int budget;
 
   @override
   State<RecipesPage> createState() => _RecipesPageState();
@@ -24,13 +26,15 @@ class _RecipesPageState extends State<RecipesPage> {
 
   @override
   void initState() {
-    _fetchRecipes(widget.days);
+    _fetchRecipes(widget.days, widget.calories, widget.budget);
     super.initState();
   }
 
-  _fetchRecipes(int daysNumber) async {
-    var prompt = buildRequestBody(daysNumber);
-    recipesList = sendGeminiRequest(prompt);
+  _fetchRecipes(int daysNumber, int calories, int budget) async {
+    var requestBody = buildRequestBody(
+        buildPrompt(daysNumber, calories, budget)
+    );
+    recipesList = sendGeminiRequest(requestBody);
   }
 
   @override
@@ -38,51 +42,50 @@ class _RecipesPageState extends State<RecipesPage> {
     return Scaffold(
         body: Center(
             child: FutureBuilder<List<MealPlan>>(
-          future: recipesList,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const CircularProgressIndicator();
-            } else if (snapshot.hasData) {
-              return ListView.builder(
-                scrollDirection: Axis.horizontal,
-                physics: const PageScrollPhysics(), // this for snapping
-                itemCount: snapshot.data!.length,
-                itemBuilder: (_, index) {
-                  var data = snapshot.data![index];
-                  return _buildMealPlanCard(data);
-                },
-              );
-            } else {
-              return const Text("No data");
-            }
-          },
-        )
-        )
-    );
+      future: recipesList,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const CircularProgressIndicator();
+        } else if (snapshot.hasData) {
+          return ListView.builder(
+            scrollDirection: Axis.horizontal,
+            physics: const PageScrollPhysics(), // Snapping effect
+            itemCount: snapshot.data!.length,
+            itemBuilder: (_, index) {
+              var data = snapshot.data![index];
+              return _buildMealPlanCard(data);
+            },
+          );
+        } else {
+          return const Text("No data");
+        }
+      },
+    )));
   }
 
   SizedBox _buildMealPlanCard(MealPlan mealPlan) {
     return SizedBox(
         width: MediaQuery.of(context).size.width,
         child: Card(
-          child: SingleChildScrollView(child: Column(
+            child: SingleChildScrollView(
+          child: Column(
             children: [
               Text(mealPlan.dayId),
               Column(
                   children: mealPlan.meals.entries.map((entry) {
-                    var title = entry.key;
-                    var recipe = entry.value;
-                    return Column(children: [
-                      Text(title),
-                      Text(recipe.recipeName!),
-                      Text(recipe.recipe!),
-                      Text(recipe.calories.toString()),
-                      Text(recipe.price.toString()),
-                      const Divider(height: 50, thickness: 1)
-                    ]);
-                  }).toList())
+                var title = entry.key;
+                var recipe = entry.value;
+                return Column(children: [
+                  Text(title),
+                  Text(recipe.recipeName!),
+                  Text(recipe.recipe!),
+                  Text(recipe.calories.toString()),
+                  Text(recipe.price.toString()),
+                  const Divider(height: 50, thickness: 1)
+                ]);
+              }).toList())
             ],
-          ),)
-        ));
+          ),
+        )));
   }
 }

@@ -59,7 +59,7 @@ Future<List<MealPlan>> _parseJsonResponse(http.Response response) async{
   return weeklyMealPlan;
 }
 
-String buildRequestBody(int daysNumber) {
+String buildRequestBody(String prompt) {
   final Map<String, dynamic> requestBody = {
     "system_instruction": {
       "parts": [
@@ -69,7 +69,7 @@ String buildRequestBody(int daysNumber) {
     "contents": [
       {
         "parts": [
-          {"text": _buildPrompt(daysNumber)}
+          {"text": prompt}
         ]
       }
     ],
@@ -81,8 +81,11 @@ String buildRequestBody(int daysNumber) {
   return jsonEncode(requestBody);
 }
 
-String _buildPrompt(int daysNumber){
+String buildPrompt(int daysNumber, int calories, int budget){
+  // add checks for unrealistic calories and budget like 0 calories and 0 usd.
   return """
+    Overall calories amount should be no more than $calories. 
+    Overall price in usd should be no more than $budget.
     Give me recipes for $daysNumber days for meal names 'breakfast', 'lunch' and 'dinner'
     using this JSON schema, replace 'day_id' with day number 
     starting from number '0' and replace 'meal_name' with an actual 
