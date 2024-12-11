@@ -1,47 +1,9 @@
-import 'package:fitsy/screens/home_page.dart';
-import 'package:fitsy/screens/plans_page.dart';
-import 'package:fitsy/screens/recipes_page.dart';
-import 'package:fitsy/widgets/app_scaffold.dart';
+import 'package:fitsy/navigation/app_navigator.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 void main() {
   runApp(const MyApp());
 }
-
-final _rootNavigatorKey = GlobalKey<NavigatorState>();
-final _shellNavigatorKey = GlobalKey<NavigatorState>();
-
-// GoRouter configuration
-final _router = GoRouter(
-  navigatorKey: _rootNavigatorKey,
-  initialLocation: '/',
-  routes: [
-    ShellRoute(
-        navigatorKey: _shellNavigatorKey,
-        builder: (context, state, child) => AppScaffold(child: child),
-        routes: [
-          GoRoute(
-            name: 'home',
-            path: '/',
-            builder: (context, state) => const HomePage(title: 'Home'),
-          ),
-          GoRoute(
-            name: 'recipes',
-            path: '/recipes/:days',
-            builder: (context, state) {
-              int days = int.parse(state.pathParameters['days']!);
-              return RecipesPage(title: 'Recipes', days: days);
-            },
-          ),
-          GoRoute(
-            name: 'plans',
-            path: '/plans',
-            builder: (context, state) => const PlansPage(title: 'Plans'),
-          ),
-        ])
-  ],
-);
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -60,7 +22,7 @@ class MyApp extends StatelessWidget {
             ),
         useMaterial3: true,
       ),
-      routerConfig: _router,
+      routerConfig: AppNavigator.instance.router,
     );
   }
 }

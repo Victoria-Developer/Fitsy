@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key, required this.title});
+  const HomePage({
+    super.key,
+    required this.title,
+    required this.onNavigateToRecipes
+  });
 
   final String title;
+  final void Function(int) onNavigateToRecipes;
 
   @override
   State<HomePage> createState() => _HomePagePageState();
@@ -22,10 +26,6 @@ class _HomePagePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-          title: Text(widget.title),
-        ),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -35,7 +35,7 @@ class _HomePagePageState extends State<HomePage> {
               ElevatedButton(
                 onPressed: () {
                   // Send data to recipes screen
-                  context.pushNamed('recipes', pathParameters: {"days": "$days"});
+                  widget.onNavigateToRecipes(days);
                 },
                 child: const Text('Plan meals'),
               ),
