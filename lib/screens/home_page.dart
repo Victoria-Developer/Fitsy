@@ -18,24 +18,23 @@ class HomePage extends StatefulWidget {
 
 class _HomePagePageState extends State<HomePage> {
   final daysList = [1, 2, 3, 4, 5, 6, 7];
-  late Future<Settings> settings;
-  late int days;
-  late int calories;
-  late int budget;
+  final settingsRepository = SettingsRepository.instance;
+  bool isDataLoaded = false;
+  late int days, calories, budget;
 
   @override
   initState() {
-    loadPrefs();
+    loadSettings();
     super.initState();
   }
 
-  loadPrefs() async {
-    var settingsRepository = SettingsRepository.instance;
-    settings = settingsRepository.loadPrefs();
-    settings.then((onValue) {
-      days = onValue.days;
-      calories = onValue.calories;
-      budget = onValue.budget;
+  loadSettings() async {
+    Settings settings = await settingsRepository.loadSettings();
+    days = settings.days;
+    calories = settings.calories;
+    budget = settings.budget;
+    setState(() {
+      isDataLoaded = true;
     });
   }
 
@@ -43,35 +42,31 @@ class _HomePagePageState extends State<HomePage> {
     setState(() {
       this.days = days;
     });
+    settingsRepository.saveDays(days);
   }
 
   _setCalories(int calories) {
     setState(() {
       this.calories = calories;
     });
+    settingsRepository.saveCalories(calories);
   }
 
   _setBudget(int budget) {
     setState(() {
       this.budget = budget;
     });
+    settingsRepository.saveBudget(budget);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         body: Center(
-            child: FutureBuilder<Settings>(
-                future: settings,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const CircularProgressIndicator();
-                  } else if (snapshot.hasData) {
-                    return _buildSettingsPanel();
-                  } else {
-                    return const Text("No data");
-                  }
-                })));
+            child: isDataLoaded
+                ? _buildSettingsPanel()
+                : const CircularProgressIndicator()
+            ));
   }
 
   Widget _buildSettingsPanel() {
@@ -90,18 +85,18 @@ class _HomePagePageState extends State<HomePage> {
           ],
         ),
         const SizedBox(height: 20),
+        const Text('Overall calories:'),
         OutlinedTextField(
             initialValue: calories.toString(),
-            labelText: 'Calories',
             hintText: '1400',
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             onEdit: (value) {
               _setCalories(int.parse(value));
             }),
         const SizedBox(height: 20),
+        const Text('Budget for whole meal period in usd:'),
         OutlinedTextField(
             initialValue: budget.toString(),
-            labelText: 'Budget for whole meal period in usd',
             hintText: '500',
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             onEdit: (value) {

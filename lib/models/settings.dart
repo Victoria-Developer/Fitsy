@@ -1,9 +1,5 @@
 class Settings {
-  Settings({
-    required this.days,
-    required this.calories,
-    required this.budget
-  });
+  Settings({this.days = 0, this.calories = 0, this.budget = 0});
 
   int days;
   int calories;

@@ -14,7 +14,7 @@ class SettingsRepository {
 
   SettingsRepository._internal();
 
-  Future<Settings> loadPrefs() async {
+  Future<Settings> loadSettings() async {
     _preferences = await SharedPreferences.getInstance();
     int days = _preferences.getInt(_daysKey) ?? 1;
     int calories = _preferences.getInt(_caloriesKey) ?? 1400;
@@ -22,27 +22,15 @@ class SettingsRepository {
     return Settings(days: days, calories: calories, budget: budget);
   }
 
-  Future<int> getDays() async {
-    return _preferences.getInt(_daysKey) ?? 1;
+  saveDays(int days) async {
+    _preferences.setInt(_daysKey, days);
   }
 
-  Future setDays(int days) {
-    return _preferences.setInt(_daysKey, days);
+  saveCalories(int calories) async {
+    _preferences.setInt(_caloriesKey, calories);
   }
 
-  Future<int> getCalories() async {
-    return _preferences.getInt(_caloriesKey) ?? 1400;
-  }
-
-  Future setCalories(int calories) {
-    return _preferences.setInt(_caloriesKey, calories);
-  }
-
-  Future<int> getBudget() async {
-    return _preferences.getInt(_budgetKey) ?? 100;
-  }
-
-  Future setBudget(int budget) {
-    return _preferences.setInt(_budgetKey, budget);
+  saveBudget(int budget) async {
+    _preferences.setInt(_budgetKey, budget);
   }
 }

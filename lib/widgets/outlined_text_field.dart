@@ -5,15 +5,13 @@ class OutlinedTextField extends StatelessWidget {
   const OutlinedTextField({
     super.key,
     this.initialValue = "",
-    this.hintText = 'Hint',
-    this.labelText = 'Label',
+    this.hintText = "",
     this.inputFormatters = const [],
     this.onEdit,
   });
 
   final String initialValue;
   final String hintText;
-  final String labelText;
   final List<TextInputFormatter> inputFormatters;
 
   final void Function(String)? onEdit;
@@ -28,7 +26,6 @@ class OutlinedTextField extends StatelessWidget {
       inputFormatters: inputFormatters,
       decoration: InputDecoration(
           border: const OutlineInputBorder(),
-          labelText: labelText,
           hintText: hintText,
           hintStyle:
               TextStyle(color: Colors.grey[400], fontWeight: FontWeight.bold)),

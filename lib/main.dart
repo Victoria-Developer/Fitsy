@@ -5,11 +5,11 @@ late AppNavigator nav;
 
 void main() {
   nav = AppNavigator.instance;
-  runApp(const MyApp());
+  runApp(const App());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class App extends StatelessWidget {
+  const App({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -21,8 +21,8 @@ class MyApp extends StatelessWidget {
         cardTheme:
             CardTheme(color: Colors.white60, shadowColor: Colors.lime.shade50),
         textTheme: TextTheme(
-            bodyMedium: TextStyle(fontSize: screenWidth * 0.05), // Regular text
-            ),
+          bodyMedium: TextStyle(fontSize: screenWidth * 0.05), // Regular text
+        ),
         useMaterial3: true,
       ),
       routerConfig: nav.router,
