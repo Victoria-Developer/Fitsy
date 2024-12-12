@@ -33,18 +33,13 @@ class _DynamicBottomBarState extends State<DynamicBottomBar> {
   }
 
   IconButton _buildIconButton(Icon icon, int index) {
-    const unselectedItemColor = Colors.black54;
-    const selectedItemColor = Colors.amber;
-
     return IconButton(
       icon: icon,
       iconSize: 30.0,
+      isSelected: widget.currentTabId == index,
       onPressed: () {
         widget.onNavigateToTab(index);
-      },
-      color: widget.currentTabId == index
-          ? selectedItemColor
-          : unselectedItemColor,
+      }
     );
   }
 }

@@ -18,7 +18,7 @@ class AppNavigator {
 
   final homeRoute = NavRoute(id: 0, path: "/", name: "home");
   final plansRoute = NavRoute(id: 1, path: "/plans", name: "plans");
-  final recipesRoute = NavRoute(id: -1, path: "/recipes", name: "recipes");
+  final recipesRoute = NavRoute(id: 2, path: "/recipes", name: "recipes");
 
   AppNavigator._internal() {
     final routes = <NavRoute>[homeRoute, recipesRoute, plansRoute];
@@ -84,7 +84,7 @@ class AppNavigator {
     List routeStacks = [...delegate.currentConfiguration.routes];
 
     bool pathExists = routeStacks.any((route) {
-      return route is GoRoute && route.name == routePath;
+      return route is GoRoute && route.path == routePath;
     });
 
     if (!pathExists) {
@@ -95,7 +95,7 @@ class AppNavigator {
     for (int i = routeStacks.length - 1; i >= 0; i--) {
       RouteBase route = routeStacks[i];
       if (route is GoRoute) {
-        if (route.name == routePath) break;
+        if (route.path == routePath) break;
         if (i != 0 && routeStacks[i - 1] is ShellRoute) {
           RouteMatchList matchList = delegate.currentConfiguration;
           router.restore(matchList.remove(matchList.matches.last));

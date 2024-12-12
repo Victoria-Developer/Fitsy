@@ -63,7 +63,7 @@ String buildRequestBody(String prompt) {
   final Map<String, dynamic> requestBody = {
     "system_instruction": {
       "parts": [
-        {"text": ""}
+        {"text": "Follow instructions in prompt."}
       ]
     },
     "contents": [

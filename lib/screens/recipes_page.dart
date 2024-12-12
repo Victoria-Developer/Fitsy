@@ -26,13 +26,13 @@ class _RecipesPageState extends State<RecipesPage> {
 
   @override
   void initState() {
-    _fetchRecipes(widget.days, widget.calories, widget.budget);
+    _fetchRecipes();
     super.initState();
   }
 
-  _fetchRecipes(int daysNumber, int calories, int budget) async {
+  _fetchRecipes() async {
     var requestBody = buildRequestBody(
-        buildPrompt(daysNumber, calories, budget)
+        buildPrompt(widget.days, widget.calories, widget.budget)
     );
     recipesList = sendGeminiRequest(requestBody);
   }

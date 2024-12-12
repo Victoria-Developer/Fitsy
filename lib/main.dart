@@ -1,7 +1,10 @@
 import 'package:fitsy/navigation/app_navigator.dart';
 import 'package:flutter/material.dart';
 
+late AppNavigator nav;
+
 void main() {
+  nav = AppNavigator.instance;
   runApp(const MyApp());
 }
 
@@ -22,7 +25,7 @@ class MyApp extends StatelessWidget {
             ),
         useMaterial3: true,
       ),
-      routerConfig: AppNavigator.instance.router,
+      routerConfig: nav.router,
     );
   }
 }
