@@ -35,7 +35,7 @@ class AppNavigator {
                       orElse: () => routes[0])
                   .id;
               return Scaffold(
-                body: child,
+                body: SafeArea(child: child),
                 bottomNavigationBar: DynamicBottomBar(
                     onNavigateToTab: onNavigateToTab, currentTabId: index),
               );

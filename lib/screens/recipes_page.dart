@@ -32,8 +32,7 @@ class _RecipesPageState extends State<RecipesPage> {
 
   _fetchRecipes() async {
     var requestBody = buildRequestBody(
-        buildPrompt(widget.days, widget.calories, widget.budget)
-    );
+        buildPrompt(widget.days, widget.calories, widget.budget));
     recipesList = sendGeminiRequest(requestBody);
   }
 
@@ -70,7 +69,7 @@ class _RecipesPageState extends State<RecipesPage> {
             child: SingleChildScrollView(
           child: Column(
             children: [
-              Text(mealPlan.dayId),
+              Text("Day ${mealPlan.dayId}"),
               Column(
                   children: mealPlan.meals.entries.map((entry) {
                 var title = entry.key;

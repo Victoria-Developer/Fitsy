@@ -6,8 +6,8 @@ import 'package:http/http.dart' as http;
 import '../models/meal_plan.dart';
 import 'gemini_model.dart';
 
-Future<http.Response?> _sendHttpRequest(String httpRoute,
-    String requestBody) async {
+Future<http.Response?> _sendHttpRequest(
+    String httpRoute, String requestBody) async {
   try {
     final response = await http.post(
       Uri.parse(httpRoute),
@@ -40,7 +40,7 @@ Future<List<MealPlan>> sendGeminiRequest(String requestBody) async {
   }
 }
 
-Future<List<MealPlan>> _parseJsonResponse(http.Response response) async{
+Future<List<MealPlan>> _parseJsonResponse(http.Response response) async {
   // Parse the JSON response
   final jsonData = jsonDecode(response.body);
 
@@ -81,14 +81,16 @@ String buildRequestBody(String prompt) {
   return jsonEncode(requestBody);
 }
 
-String buildPrompt(int daysNumber, int calories, int budget){
+String buildPrompt(int daysNumber, int calories, int budget) {
   // add checks for unrealistic calories and budget like 0 calories and 0 usd.
   return """
     Overall calories amount should be no more than $calories. 
     Overall price in usd should be no more than $budget.
-    Give me recipes for $daysNumber days for meal names 'breakfast', 'lunch' and 'dinner'
-    using this JSON schema, replace 'day_id' with day number 
-    starting from number '0' and replace 'meal_name' with an actual 
+    Give me recipes for $daysNumber days for meal names 
+    'breakfast', 'lunch' and 'dinner' using this JSON schema. 
+    Replace 'day_id' with the corresponding day number 
+    (starting from `1` even if there is only one day) 
+    and replace 'meal_name' with an actual 
     name like 'lunch':
     {
         "day_id":{

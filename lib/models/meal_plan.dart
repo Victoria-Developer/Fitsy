@@ -2,7 +2,7 @@ import 'package:fitsy/models/recipe.dart';
 
 // Daily meal plan
 class MealPlan {
-  String dayId;
+  int dayId;
   Map<String, Recipe> meals;
 
   MealPlan({required this.dayId, required this.meals});
@@ -12,6 +12,6 @@ class MealPlan {
     json.forEach((mealName, mealJson) {
       parsedMeals[mealName] = Recipe.fromJson(mealJson);
     });
-    return MealPlan(dayId: dayId, meals: parsedMeals);
+    return MealPlan(dayId: int.parse(dayId), meals: parsedMeals);
   }
 }
