@@ -4,12 +4,14 @@ import 'package:flutter/services.dart';
 class OutlinedTextField extends StatelessWidget {
   const OutlinedTextField({
     super.key,
+    this.initialValue = "",
     this.hintText = 'Hint',
     this.labelText = 'Label',
     this.inputFormatters = const [],
     this.onEdit,
   });
 
+  final String initialValue;
   final String hintText;
   final String labelText;
   final List<TextInputFormatter> inputFormatters;
@@ -18,7 +20,8 @@ class OutlinedTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TextField(
+    return TextFormField(
+      initialValue: initialValue,
       onChanged: (text) {
         onEdit!(text);
       },
@@ -32,3 +35,5 @@ class OutlinedTextField extends StatelessWidget {
     );
   }
 }
+
+

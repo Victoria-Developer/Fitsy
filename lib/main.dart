@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
         cardTheme:
             CardTheme(color: Colors.white60, shadowColor: Colors.lime.shade50),
         textTheme: TextTheme(
-            bodyMedium: TextStyle(fontSize: screenWidth * 0.05) // Regular text
+            bodyMedium: TextStyle(fontSize: screenWidth * 0.05), // Regular text
             ),
         useMaterial3: true,
       ),
