@@ -1,11 +1,11 @@
-import 'package:fitsy/navigation/route.dart';
-import 'package:fitsy/widgets/dynamic_bottom_bar.dart';
+import 'package:fitsy/presentation/navigation/route.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../screens/home_page.dart';
 import '../screens/plans_page.dart';
-import '../screens/recipes_page.dart';
+import '../screens/plan_generator_page.dart';
+import '../widgets/dynamic_bottom_bar.dart';
 
 class AppNavigator {
   static final AppNavigator _instance = AppNavigator._internal();
@@ -62,7 +62,7 @@ class AppNavigator {
                   int days = int.parse(state.pathParameters['days']!);
                   int calories = int.parse(state.pathParameters['calories']!);
                   int budget = int.parse(state.pathParameters['budget']!);
-                  return RecipesPage(
+                  return PlanGeneratorPage(
                       title: 'Recipes',
                       days: days,
                       calories: calories,

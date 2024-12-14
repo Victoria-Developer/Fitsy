@@ -1,0 +1,84 @@
+{
+  "_note1": "KEEP THIS FILE! Check it into a version control system (VCS) like git.",
+  "_note2": "ObjectBox manages crucial IDs for your object model. See docs for details.",
+  "_note3": "If you have VCS merge conflicts, you must resolve them according to ObjectBox docs.",
+  "entities": [
+    {
+      "id": "1:6719496625513008878",
+      "lastPropertyId": "2:222508286148098768",
+      "name": "MealPlan",
+      "properties": [
+        {
+          "id": "1:8891874079131425183",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:222508286148098768",
+          "name": "dayId",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "2:2323773367971043792",
+      "lastPropertyId": "7:3333572910343793667",
+      "name": "Recipe",
+      "properties": [
+        {
+          "id": "1:7855596835509486918",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:3745621742714782266",
+          "name": "recipeId",
+          "type": 6
+        },
+        {
+          "id": "3:8416538083613502",
+          "name": "name",
+          "type": 9
+        },
+        {
+          "id": "4:1077257197707958511",
+          "name": "instructions",
+          "type": 9
+        },
+        {
+          "id": "5:3375101505032187899",
+          "name": "calories",
+          "type": 6
+        },
+        {
+          "id": "6:1538050498258633714",
+          "name": "price",
+          "type": 8
+        },
+        {
+          "id": "7:3333572910343793667",
+          "name": "mealPlanId",
+          "type": 11,
+          "flags": 520,
+          "indexId": "1:7406323545699297081",
+          "relationTarget": "MealPlan"
+        }
+      ],
+      "relations": []
+    }
+  ],
+  "lastEntityId": "2:2323773367971043792",
+  "lastIndexId": "1:7406323545699297081",
+  "lastRelationId": "0:0",
+  "lastSequenceId": "0:0",
+  "modelVersion": 5,
+  "modelVersionParserMinimum": 5,
+  "retiredEntityUids": [],
+  "retiredIndexUids": [],
+  "retiredPropertyUids": [],
+  "retiredRelationUids": [],
+  "version": 1
+}

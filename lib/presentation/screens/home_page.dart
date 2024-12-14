@@ -1,9 +1,10 @@
-import 'package:fitsy/models/settings.dart';
-import 'package:fitsy/widgets/outlined_text_field.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../repositories/settings_repository.dart';
+import '../../data/repositories/settings_repository.dart';
+import '../../domain/models/settings.dart';
+import '../widgets/outlined_text_field.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage(

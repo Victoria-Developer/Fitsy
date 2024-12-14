@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-import '../models/meal_plan.dart';
-import '../services/http_request.dart';
+import '../../data/entities/meal_plan.dart';
+import '../../data/network/http_request.dart';
 
-class RecipesPage extends StatefulWidget {
-  const RecipesPage({
+class PlanGeneratorPage extends StatefulWidget {
+  const PlanGeneratorPage({
     super.key,
     required this.title,
     required this.days,
@@ -18,10 +18,10 @@ class RecipesPage extends StatefulWidget {
   final int budget;
 
   @override
-  State<RecipesPage> createState() => _RecipesPageState();
+  State<PlanGeneratorPage> createState() => _PlanGeneratorPageState();
 }
 
-class _RecipesPageState extends State<RecipesPage> {
+class _PlanGeneratorPageState extends State<PlanGeneratorPage> {
   late Future<List<MealPlan>> recipesList;
 
   @override
@@ -71,15 +71,13 @@ class _RecipesPageState extends State<RecipesPage> {
             children: [
               Text("Day ${mealPlan.dayId}"),
               Column(
-                  children: mealPlan.meals.entries.map((entry) {
-                var title = entry.key;
-                var recipe = entry.value;
+                  children: mealPlan.recipes.map((recipe) {
                 return Column(children: [
-                  Text(title),
-                  Text(recipe.recipeName!),
-                  Text(recipe.recipe!),
-                  Text(recipe.calories.toString()),
-                  Text(recipe.price.toString()),
+                  // Text(recipe.recipeId.toString()),
+                  Text(recipe.name!),
+                  Text(recipe.instructions!),
+                  Text("${recipe.calories.toString()} calories"),
+                  Text("${recipe.price.toString()} \$"),
                   const Divider(height: 50, thickness: 1)
                 ]);
               }).toList())

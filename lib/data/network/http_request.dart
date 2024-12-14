@@ -3,7 +3,9 @@ import 'dart:developer';
 
 import 'package:fitsy/auth/secrets.dart';
 import 'package:http/http.dart' as http;
-import '../models/meal_plan.dart';
+
+
+import '../entities/meal_plan.dart';
 import 'gemini_model.dart';
 
 Future<http.Response?> _sendHttpRequest(
@@ -48,22 +50,20 @@ Future<List<MealPlan>> _parseJsonResponse(http.Response response) async {
   log(text);
   if (text == null) return [];
 
-  // Decode JSON
-  Map<String, dynamic> decodedText = jsonDecode(text);
+  // Parse JSON into MealPlan objects
+  final parsedData = jsonDecode(text) as Map<String, dynamic>;
+  final List<MealPlan> mealPlans = parsedData.entries
+      .map((entry) => MealPlan.fromJson(entry.key, entry.value))
+      .toList();
 
-  // Parse meal plans
-  List<MealPlan> weeklyMealPlan = decodedText.entries.map((entry) {
-    return MealPlan.fromJson(entry.key, entry.value);
-  }).toList();
-
-  return weeklyMealPlan;
+  return mealPlans;
 }
 
 String buildRequestBody(String prompt) {
   final Map<String, dynamic> requestBody = {
     "system_instruction": {
       "parts": [
-        {"text": "Follow instructions in prompt."}
+        {"text": "Follow instructions in prompt. Follow the DRY principle (Don't repeat yourself)."}
       ]
     },
     "contents": [
@@ -84,23 +84,24 @@ String buildRequestBody(String prompt) {
 String buildPrompt(int daysNumber, int calories, int budget) {
   // add checks for unrealistic calories and budget like 0 calories and 0 usd.
   return """
-    Overall calories amount should be no more than $calories. 
+    Calories amount per day should be no more than $calories. 
     Overall price in usd should be no more than $budget.
-    Give me recipes for $daysNumber days for meal names 
-    'breakfast', 'lunch' and 'dinner' using this JSON schema. 
+    Give me recipes for $daysNumber days for 3 meals using this JSON schema. 
     Replace 'day_id' with the corresponding day number 
-    (starting from `1` even if there is only one day) 
-    and replace 'meal_name' with an actual 
-    name like 'lunch':
+    (starting from `1` even if there is only one day). 
+    Replace 'meal_id' with an actual index 
+    (starting from `0` even if there is only one meal).
+    Describe recipes in detail with all ingredients measurements.
+    Don't mention meal name like 'breakfast' in 'recipe_name'.
     {
         "day_id":{
-              "meal_name":{ 
-                'id':{'type': 'int'},
+              [{ 
+                'id': {'type': 'int'},
                 'recipe_name': {'type': 'string'},
-                'recipe':{'type': 'string'},
-                'calories'{'type': 'int'}
-                'usd_price':{'type': 'int'}
-              }
+                'recipe': {'type': 'string'},
+                'calories': {'type': 'int'},
+                'usd_price': {'type': 'int'}
+              }]
         }
     }    
     """;

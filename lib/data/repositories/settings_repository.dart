@@ -1,5 +1,5 @@
-import 'package:fitsy/models/settings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../domain/models/settings.dart';
 
 class SettingsRepository {
   static final SettingsRepository _instance = SettingsRepository._internal();

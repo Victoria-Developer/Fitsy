@@ -1,10 +1,18 @@
-import 'package:fitsy/navigation/app_navigator.dart';
+import 'package:fitsy/presentation/navigation/app_navigator.dart';
 import 'package:flutter/material.dart';
 
-late AppNavigator nav;
+import 'data/database/app_box.dart';
 
-void main() {
-  nav = AppNavigator.instance;
+late AppNavigator navigation;
+late AppBox appBox;
+
+Future<void> main() async {
+  navigation = AppNavigator.instance;
+  // This is required so ObjectBox can get the application directory
+  // to store the database in.
+  WidgetsFlutterBinding.ensureInitialized();
+  appBox = await AppBox.create();
+
   runApp(const App());
 }
 
@@ -17,15 +25,14 @@ class App extends StatelessWidget {
     return MaterialApp.router(
       title: 'Fitsy',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        cardTheme:
-            CardTheme(color: Colors.white60, shadowColor: Colors.lime.shade50),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.lime.shade100),
+        //cardTheme: CardTheme(color:Colors.lime.shade100),
         textTheme: TextTheme(
           bodyMedium: TextStyle(fontSize: screenWidth * 0.05), // Regular text
         ),
         useMaterial3: true,
       ),
-      routerConfig: nav.router,
+      routerConfig: navigation.router,
     );
   }
 }
