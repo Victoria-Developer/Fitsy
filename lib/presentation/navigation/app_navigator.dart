@@ -2,9 +2,9 @@ import 'package:fitsy/presentation/navigation/route.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../screens/home_page.dart';
-import '../screens/plans_page.dart';
-import '../screens/plan_generator_page.dart';
+import '../../data/repositories/settings_repository.dart';
+import '../screens/options_page.dart';
+import '../screens/recipes_page.dart';
 import '../widgets/dynamic_bottom_bar.dart';
 
 class AppNavigator {
@@ -14,68 +14,72 @@ class AppNavigator {
 
   late GoRouter router;
   final _rootNavigatorKey = GlobalKey<NavigatorState>();
-  final _shellNavigatorKey = GlobalKey<NavigatorState>();
 
-  final homeRoute = NavRoute(id: 0, path: "/", name: "home");
-  final plansRoute = NavRoute(id: 1, path: "/plans", name: "plans");
-  final recipesRoute = NavRoute(id: 2, path: "/recipes", name: "recipes");
+  final recipesRoute = NavRoute(id: 0, path: "/recipes", name: "recipes");
+  final optionsRoute = NavRoute(id: 1, path: "/options", name: "options");
 
   AppNavigator._internal() {
-    final routes = <NavRoute>[homeRoute, recipesRoute, plansRoute];
+    final settingsRepository = SettingsRepository.instance;
+    final routes = <NavRoute>[recipesRoute, optionsRoute];
+    bool isFirstLaunch = settingsRepository.isFirstLaunch;
 
     router = GoRouter(
       navigatorKey: _rootNavigatorKey,
-      initialLocation: homeRoute.path,
+      initialLocation: isFirstLaunch ? optionsRoute.path : recipesRoute.path,
       routes: [
-        ShellRoute(
-            navigatorKey: _shellNavigatorKey,
-            builder: (context, state, child) {
-              int index = routes
-                  .firstWhere((route) => route.name == state.topRoute!.name,
-                      orElse: () => routes[0])
-                  .id;
-              return Scaffold(
-                body: SafeArea(child: child),
-                bottomNavigationBar: DynamicBottomBar(
-                    onNavigateToTab: onNavigateToTab, currentTabId: index),
-              );
-            },
-            routes: [
-              GoRoute(
-                name: homeRoute.name,
-                path: homeRoute.path,
-                builder: (context, state) => HomePage(
-                    onNavigateToRecipes: (days, calories, budget) {
-                      router.pushNamed(recipesRoute.name, pathParameters: {
-                        "days": "$days",
-                        "calories": "$calories",
-                        "budget": "$budget"
-                      });
-                      // index = -1;
-                    },
-                    title: 'Home'),
-              ),
-              GoRoute(
-                name: recipesRoute.name,
-                path: '${recipesRoute.path}/:days/:calories/:budget',
-                builder: (context, state) {
-                  int days = int.parse(state.pathParameters['days']!);
-                  int calories = int.parse(state.pathParameters['calories']!);
-                  int budget = int.parse(state.pathParameters['budget']!);
-                  return PlanGeneratorPage(
-                      title: 'Recipes',
-                      days: days,
-                      calories: calories,
-                      budget: budget);
+        GoRoute(
+          name: optionsRoute.name,
+          path: optionsRoute.path,
+          builder: (context, state) {
+            final child = OptionsPage(
+                onNavigateToPlanGeneratorPage: (days, calories, budget) {
+                  router.pushNamed(recipesRoute.name, extra: {
+                    "days": "$days",
+                    "calories": "$calories",
+                    "budget": "$budget"
+                  });
+                  if (isFirstLaunch) {
+                    isFirstLaunch = false;
+                  }
                 },
-              ),
-              GoRoute(
-                name: plansRoute.name,
-                path: plansRoute.path,
-                builder: (context, state) => const PlansPage(title: 'Plans'),
-              ),
-            ])
+                title: 'Options');
+            return isFirstLaunch
+                ? child
+                : _buildScreenWithStaticBottomBar(
+                    state, routes, child, optionsRoute.id);
+          },
+        ),
+        GoRoute(
+          name: recipesRoute.name,
+          path: recipesRoute.path, //:days/:calories/:budget
+          builder: (context, state) {
+            final extra = state.extra as Map<String, String>?;
+            final days =
+                int.tryParse(extra?['days'] ?? '') ?? settingsRepository.days;
+            final calories = int.tryParse(extra?['calories'] ?? '') ??
+                settingsRepository.calories;
+            final budget = int.tryParse(extra?['budget'] ?? '') ??
+                settingsRepository.budget;
+
+            final child = RecipesPage(
+                title: 'Recipes',
+                days: days,
+                calories: calories,
+                budget: budget);
+            return _buildScreenWithStaticBottomBar(
+                state, routes, child, recipesRoute.id);
+          },
+        ),
+        //]),
       ],
+    );
+  }
+
+  Widget _buildScreenWithStaticBottomBar(state, routes, child, index) {
+    return Scaffold(
+      body: SafeArea(child: child),
+      bottomNavigationBar: DynamicBottomBar(
+          onNavigateToTab: onNavigateToTab, currentTabId: index),
     );
   }
 
@@ -109,13 +113,13 @@ class AppNavigator {
   void onNavigateToTab(int index) {
     switch (index) {
       case 0:
-        popUntilPath(homeRoute.path);
+        popUntilPath(recipesRoute.path);
         break;
       case 1:
-        popUntilPath(plansRoute.path);
+        popUntilPath(optionsRoute.path);
         break;
       default:
-        router.go(homeRoute.path);
+        router.go(optionsRoute.path);
         break;
     }
   }

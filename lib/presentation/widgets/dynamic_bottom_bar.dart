@@ -25,7 +25,7 @@ class _DynamicBottomBarState extends State<DynamicBottomBar> {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Widget>[
             _buildIconButton(const Icon(Icons.home), 0),
-            _buildIconButton(const Icon(Icons.access_time), 1),
+            _buildIconButton(const Icon(Icons.settings), 1),
           ],
         ),
       ),

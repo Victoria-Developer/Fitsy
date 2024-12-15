@@ -1,3 +1,4 @@
+import 'package:fitsy/data/repositories/settings_repository.dart';
 import 'package:fitsy/presentation/navigation/app_navigator.dart';
 import 'package:flutter/material.dart';
 
@@ -7,11 +8,12 @@ late AppNavigator navigation;
 late AppBox appBox;
 
 Future<void> main() async {
-  navigation = AppNavigator.instance;
   // This is required so ObjectBox can get the application directory
   // to store the database in.
   WidgetsFlutterBinding.ensureInitialized();
   appBox = await AppBox.create();
+  await SettingsRepository.instance.loadSettings();
+  navigation = AppNavigator.instance;
 
   runApp(const App());
 }

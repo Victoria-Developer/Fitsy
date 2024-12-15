@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import '../../data/entities/meal_plan.dart';
 import '../../data/network/http_request.dart';
 
-class PlanGeneratorPage extends StatefulWidget {
-  const PlanGeneratorPage({
+class RecipesPage extends StatefulWidget {
+  const RecipesPage({
     super.key,
     required this.title,
     required this.days,
@@ -18,10 +18,10 @@ class PlanGeneratorPage extends StatefulWidget {
   final int budget;
 
   @override
-  State<PlanGeneratorPage> createState() => _PlanGeneratorPageState();
+  State<RecipesPage> createState() => _RecipesPageState();
 }
 
-class _PlanGeneratorPageState extends State<PlanGeneratorPage> {
+class _RecipesPageState extends State<RecipesPage> {
   late Future<List<MealPlan>> recipesList;
 
   @override

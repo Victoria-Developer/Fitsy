@@ -3,21 +3,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../data/repositories/settings_repository.dart';
-import '../../domain/models/settings.dart';
 import '../widgets/outlined_text_field.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage(
-      {super.key, required this.title, required this.onNavigateToRecipes});
+class OptionsPage extends StatefulWidget {
+  const OptionsPage(
+      {super.key, required this.title, required this.onNavigateToPlanGeneratorPage});
 
   final String title;
-  final void Function(int, int, int) onNavigateToRecipes;
+  final void Function(int, int, int) onNavigateToPlanGeneratorPage;
 
   @override
-  State<HomePage> createState() => _HomePagePageState();
+  State<OptionsPage> createState() => _OptionsPagePageState();
 }
 
-class _HomePagePageState extends State<HomePage> {
+class _OptionsPagePageState extends State<OptionsPage> {
   final daysList = [1, 2, 3, 4, 5, 6, 7];
   final settingsRepository = SettingsRepository.instance;
   bool isDataLoaded = false;
@@ -30,10 +29,10 @@ class _HomePagePageState extends State<HomePage> {
   }
 
   loadSettings() async {
-    Settings settings = await settingsRepository.loadSettings();
-    days = settings.days;
-    calories = settings.calories;
-    budget = settings.budget;
+    //await settingsRepository.loadSettings();
+    days = settingsRepository.days;
+    calories = settingsRepository.calories;
+    budget = settingsRepository.budget;
     setState(() {
       isDataLoaded = true;
     });
@@ -107,7 +106,7 @@ class _HomePagePageState extends State<HomePage> {
         ElevatedButton(
           onPressed: () {
             // Send data to recipes screen
-            widget.onNavigateToRecipes(days, calories, budget);
+            widget.onNavigateToPlanGeneratorPage(days, calories, budget);
           },
           child: const Text('Plan meals'),
         ),
