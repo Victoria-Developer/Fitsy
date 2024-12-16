@@ -6,9 +6,9 @@ import '../../data/repositories/settings_repository.dart';
 import '../widgets/outlined_text_field.dart';
 
 class OptionsPage extends StatefulWidget {
-  const OptionsPage({super.key, required this.onNavigateToPlanGeneratorPage});
+  const OptionsPage({super.key, required this.onNavigateToRecipesPage});
 
-  final void Function(int, int, int) onNavigateToPlanGeneratorPage;
+  final void Function(int, int, int) onNavigateToRecipesPage;
 
   @override
   State<OptionsPage> createState() => _OptionsPagePageState();
@@ -94,7 +94,7 @@ class _OptionsPagePageState extends State<OptionsPage> {
               settingsRepository.setFirstLaunch(false);
             }
             // Send data to recipes screen
-            widget.onNavigateToPlanGeneratorPage(days, calories, budget);
+            widget.onNavigateToRecipesPage(days, calories, budget);
           },
           child: const Text('Ok'),
         ),

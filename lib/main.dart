@@ -1,39 +1,48 @@
 import 'package:fitsy/data/repositories/settings_repository.dart';
 import 'package:fitsy/presentation/navigation/app_navigator.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import 'data/database/app_box.dart';
-
-late AppNavigator _navigation;
-late AppBox _appBox;
-late SettingsRepository _settingsRepository;
 
 Future<void> main() async {
   // This is required so ObjectBox can get the application directory
   // to store the database in.
   WidgetsFlutterBinding.ensureInitialized();
-  _appBox = await AppBox.create();
+  final appBox = await AppBox.create();
 
-  _settingsRepository = SettingsRepository();
-  await _settingsRepository.loadSettings();
+  final settingsRepository = SettingsRepository();
+  await settingsRepository.loadSettings();
 
-  _navigation = AppNavigator(_settingsRepository.isFirstLaunch);
+  final navigation = AppNavigator(settingsRepository.isFirstLaunch);
 
-  runApp(const App());
+  runApp(App(
+    settingsRepository: settingsRepository,
+    appBox: appBox,
+    router: navigation.router,
+  ));
 }
 
 class App extends StatelessWidget {
-  const App({super.key});
+  const App(
+      {super.key,
+      required this.settingsRepository,
+      required this.appBox,
+      required this.router});
+
+  final SettingsRepository settingsRepository;
+  final AppBox appBox;
+  final GoRouter router;
 
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     return MultiProvider(
-        providers: [
-          Provider<AppBox>(create: (_) => _appBox),
-          Provider<SettingsRepository>(create: (_) => _settingsRepository),
-        ],
+      providers: [
+        Provider<AppBox>(create: (_) => appBox),
+        Provider<SettingsRepository>(create: (_) => settingsRepository),
+      ],
       child: MaterialApp.router(
         title: 'Fitsy',
         theme: ThemeData(
@@ -44,7 +53,7 @@ class App extends StatelessWidget {
           ),
           useMaterial3: true,
         ),
-        routerConfig: _navigation.router,
+        routerConfig: router,
       ),
     );
   }

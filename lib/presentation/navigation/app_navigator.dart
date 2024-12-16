@@ -32,7 +32,7 @@ class AppNavigator {
           path: optionsRoute.path,
           builder: (context, state) {
             final child = OptionsPage(
-                onNavigateToPlanGeneratorPage: (days, calories, budget) {
+                onNavigateToRecipesPage: (days, calories, budget) {
                   router.pushNamed(recipesRoute.name, extra: {
                     "days": "$days",
                     "calories": "$calories",
@@ -69,8 +69,8 @@ class AppNavigator {
           name: onboardingRoute.name,
           path: onboardingRoute.path,
           builder: (context, state) {
-            final child = OptionsPage(
-                onNavigateToPlanGeneratorPage: (days, calories, budget) {
+            return OptionsPage(
+                onNavigateToRecipesPage: (days, calories, budget) {
                   // Navigate without ability to return to the Onboarding page.
                   router.goNamed(recipesRoute.name, extra: {
                     "days": "$days",
@@ -78,7 +78,6 @@ class AppNavigator {
                     "budget": "$budget"
                   });
                 });
-            return child;
           },
         )
       ],
@@ -93,7 +92,7 @@ class AppNavigator {
     );
   }
 
-  void popUntilPath(String routePath) {
+  void navigateTo(String routePath) {
     final GoRouterDelegate delegate = router.routerDelegate;
     List routeStacks = [...delegate.currentConfiguration.routes];
 
@@ -118,15 +117,16 @@ class AppNavigator {
         }
       }
     }
+
   }
 
   void onNavigateToTab(int index) {
     switch (index) {
       case 0:
-        popUntilPath(recipesRoute.path);
+        navigateTo(recipesRoute.path);
         break;
       case 1:
-        popUntilPath(optionsRoute.path);
+        navigateTo(optionsRoute.path);
         break;
       default:
         router.go(optionsRoute.path);
