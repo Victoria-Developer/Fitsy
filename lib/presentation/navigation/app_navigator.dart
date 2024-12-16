@@ -1,31 +1,31 @@
+
+import 'package:fitsy/data/repositories/settings_repository.dart';
 import 'package:fitsy/presentation/navigation/route.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
-import '../../data/repositories/settings_repository.dart';
+
 import '../screens/options_page.dart';
 import '../screens/recipes_page.dart';
 import '../widgets/dynamic_bottom_bar.dart';
 
 class AppNavigator {
-  static final AppNavigator _instance = AppNavigator._internal();
-
-  static AppNavigator get instance => _instance;
 
   late GoRouter router;
   final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
+  final onboardingRoute =  NavRoute(id: -1, path: "/onboarding", name: "onboarding");
   final recipesRoute = NavRoute(id: 0, path: "/recipes", name: "recipes");
   final optionsRoute = NavRoute(id: 1, path: "/options", name: "options");
 
-  AppNavigator._internal() {
-    final settingsRepository = SettingsRepository.instance;
+  AppNavigator(bool isFirstLaunch) {
+
     final routes = <NavRoute>[recipesRoute, optionsRoute];
-    bool isFirstLaunch = settingsRepository.isFirstLaunch;
 
     router = GoRouter(
       navigatorKey: _rootNavigatorKey,
-      initialLocation: isFirstLaunch ? optionsRoute.path : recipesRoute.path,
+      initialLocation: isFirstLaunch ? onboardingRoute.path : recipesRoute.path,
       routes: [
         GoRoute(
           name: optionsRoute.name,
@@ -38,21 +38,16 @@ class AppNavigator {
                     "calories": "$calories",
                     "budget": "$budget"
                   });
-                  if (isFirstLaunch) {
-                    isFirstLaunch = false;
-                  }
-                },
-                title: 'Options');
-            return isFirstLaunch
-                ? child
-                : _buildScreenWithStaticBottomBar(
+                });
+            return _buildScreenWithStaticBottomBar(
                     state, routes, child, optionsRoute.id);
           },
         ),
         GoRoute(
           name: recipesRoute.name,
-          path: recipesRoute.path, //:days/:calories/:budget
+          path: recipesRoute.path,
           builder: (context, state) {
+            final settingsRepository = context.read<SettingsRepository>();
             final extra = state.extra as Map<String, String>?;
             final days =
                 int.tryParse(extra?['days'] ?? '') ?? settingsRepository.days;
@@ -62,15 +57,30 @@ class AppNavigator {
                 settingsRepository.budget;
 
             final child = RecipesPage(
-                title: 'Recipes',
-                days: days,
-                calories: calories,
-                budget: budget);
+              days: days,
+              calories: calories,
+              budget: budget,
+            );
             return _buildScreenWithStaticBottomBar(
                 state, routes, child, recipesRoute.id);
           },
         ),
-        //]),
+        GoRoute(
+          name: onboardingRoute.name,
+          path: onboardingRoute.path,
+          builder: (context, state) {
+            final child = OptionsPage(
+                onNavigateToPlanGeneratorPage: (days, calories, budget) {
+                  // Navigate without ability to return to the Onboarding page.
+                  router.goNamed(recipesRoute.name, extra: {
+                    "days": "$days",
+                    "calories": "$calories",
+                    "budget": "$budget"
+                  });
+                });
+            return child;
+          },
+        )
       ],
     );
   }

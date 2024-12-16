@@ -1,15 +1,13 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 
 import '../../data/repositories/settings_repository.dart';
 import '../widgets/outlined_text_field.dart';
 
 class OptionsPage extends StatefulWidget {
-  const OptionsPage(
-      {super.key, required this.title, required this.onNavigateToPlanGeneratorPage});
+  const OptionsPage({super.key, required this.onNavigateToPlanGeneratorPage});
 
-  final String title;
   final void Function(int, int, int) onNavigateToPlanGeneratorPage;
 
   @override
@@ -18,59 +16,43 @@ class OptionsPage extends StatefulWidget {
 
 class _OptionsPagePageState extends State<OptionsPage> {
   final daysList = [1, 2, 3, 4, 5, 6, 7];
-  final settingsRepository = SettingsRepository.instance;
-  bool isDataLoaded = false;
+  late SettingsRepository settingsRepository;
   late int days, calories, budget;
+  late bool isFirstLaunch;
 
   @override
   initState() {
-    loadSettings();
-    super.initState();
-  }
-
-  loadSettings() async {
-    //await settingsRepository.loadSettings();
+    settingsRepository = context.read<SettingsRepository>();
     days = settingsRepository.days;
     calories = settingsRepository.calories;
     budget = settingsRepository.budget;
-    setState(() {
-      isDataLoaded = true;
-    });
+    isFirstLaunch = settingsRepository.isFirstLaunch;
+    super.initState();
   }
 
   _setDays(int days) {
     setState(() {
       this.days = days;
     });
-    settingsRepository.saveDays(days);
   }
 
   _setCalories(int calories) {
     setState(() {
       this.calories = calories;
     });
-    settingsRepository.saveCalories(calories);
   }
 
   _setBudget(int budget) {
     setState(() {
       this.budget = budget;
     });
-    settingsRepository.saveBudget(budget);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         body: Center(
-            child: isDataLoaded
-                ? _buildSettingsPanel()
-                : const CircularProgressIndicator()
-            ));
-  }
-
-  Widget _buildSettingsPanel() {
-    return Column(
+            child: Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -85,7 +67,7 @@ class _OptionsPagePageState extends State<OptionsPage> {
           ],
         ),
         const SizedBox(height: 20),
-        const Text('Overall calories:'),
+        const Text('Calories per day:'),
         OutlinedTextField(
             initialValue: calories.toString(),
             hintText: '1400',
@@ -94,7 +76,7 @@ class _OptionsPagePageState extends State<OptionsPage> {
               _setCalories(int.parse(value));
             }),
         const SizedBox(height: 20),
-        const Text('Budget for whole meal period in usd:'),
+        const Text('Budget per day in usd:'),
         OutlinedTextField(
             initialValue: budget.toString(),
             hintText: '500',
@@ -105,13 +87,19 @@ class _OptionsPagePageState extends State<OptionsPage> {
         const SizedBox(height: 20),
         ElevatedButton(
           onPressed: () {
+            settingsRepository.setDays(days);
+            settingsRepository.setCalories(calories);
+            settingsRepository.setBudget(budget);
+            if (isFirstLaunch == true) {
+              settingsRepository.setFirstLaunch(false);
+            }
             // Send data to recipes screen
             widget.onNavigateToPlanGeneratorPage(days, calories, budget);
           },
-          child: const Text('Plan meals'),
+          child: const Text('Ok'),
         ),
       ],
-    );
+    )));
   }
 
   Widget _buildDropDownDaysList() {

@@ -21,13 +21,10 @@ class AppBox {
     return AppBox._create(store);
   }
 
-  Future<void> addMealPlan(MealPlan plan) => _mealPlans.putAsync(plan);
+  Future<List<MealPlan>> getAllMealPlans() => _mealPlans.getAllAsync();
 
-  Future<void> removeMealPlan(int id) => _mealPlans.removeAsync(id);
-
-  List<MealPlan> getAllMealPlans() => _mealPlans.getAll();
-
-  void removeAllMealPlans() => _mealPlans.removeAllAsync();
-
-  void addAllMealPlans(List<MealPlan> plans) => _mealPlans.putManyAsync(plans);
+  void replaceAllMealPlans(List<MealPlan> plans) async {
+    _mealPlans.removeAll();
+    _mealPlans.putMany(plans);
+  }
 }

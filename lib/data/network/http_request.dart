@@ -85,7 +85,7 @@ String buildPrompt(int daysNumber, int calories, int budget) {
   // add checks for unrealistic calories and budget like 0 calories and 0 usd.
   return """
     Calories amount per day should be no more than $calories. 
-    Overall price in usd should be no more than $budget.
+    Costs per day in usd should be no more than $budget.
     Give me recipes for $daysNumber days for 3 meals using this JSON schema. 
     Replace 'day_id' with the corresponding day number 
     (starting from `1` even if there is only one day). 
