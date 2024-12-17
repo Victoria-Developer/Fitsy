@@ -96,7 +96,7 @@ class AppNavigator {
       body: SafeArea(child: child),
       bottomNavigationBar: DynamicBottomBar(
           onNavigateToTab: (selectedIndex) {
-            navigateTo(routes[index].path);
+            navigateTo(routes[selectedIndex].path);
           },
           currentTabId: index),
     );
