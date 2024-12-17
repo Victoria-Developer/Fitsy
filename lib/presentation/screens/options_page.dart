@@ -18,7 +18,6 @@ class _OptionsPagePageState extends State<OptionsPage> {
   final daysList = [1, 2, 3, 4, 5, 6, 7];
   late SettingsRepository settingsRepository;
   late int days, calories, budget;
-  late bool isFirstLaunch;
 
   @override
   initState() {
@@ -26,7 +25,6 @@ class _OptionsPagePageState extends State<OptionsPage> {
     days = settingsRepository.days;
     calories = settingsRepository.calories;
     budget = settingsRepository.budget;
-    isFirstLaunch = settingsRepository.isFirstLaunch;
     super.initState();
   }
 
@@ -90,9 +88,6 @@ class _OptionsPagePageState extends State<OptionsPage> {
             settingsRepository.setDays(days);
             settingsRepository.setCalories(calories);
             settingsRepository.setBudget(budget);
-            if (isFirstLaunch == true) {
-              settingsRepository.setFirstLaunch(false);
-            }
             // Send data to recipes screen
             widget.onNavigateToRecipesPage(days, calories, budget);
           },
