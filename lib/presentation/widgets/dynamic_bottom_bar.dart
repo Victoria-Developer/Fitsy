@@ -1,17 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
-class DynamicBottomBar extends StatefulWidget {
-  const DynamicBottomBar(
-      {super.key, required this.onNavigateToTab, required this.currentTabId});
+class DynamicBottomBar extends StatelessWidget {
+  const DynamicBottomBar({super.key, required this.navigationShell});
 
-  final void Function(int) onNavigateToTab;
-  final int currentTabId;
+  final StatefulNavigationShell navigationShell;
 
-  @override
-  State<DynamicBottomBar> createState() => _DynamicBottomBarState();
-}
-
-class _DynamicBottomBarState extends State<DynamicBottomBar> {
   @override
   Widget build(BuildContext context) {
     return BottomAppBar(
@@ -36,9 +30,13 @@ class _DynamicBottomBarState extends State<DynamicBottomBar> {
     return IconButton(
       icon: icon,
       iconSize: 30.0,
-      isSelected: widget.currentTabId == index,
+      isSelected: navigationShell.currentIndex == index,
       onPressed: () {
-        widget.onNavigateToTab(index);
+        navigationShell.goBranch(
+          index,
+          initialLocation:
+          index == navigationShell.currentIndex,
+        );
       }
     );
   }
