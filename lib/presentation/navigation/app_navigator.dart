@@ -10,12 +10,10 @@ import '../widgets/dynamic_bottom_bar.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
-final redirectionRoute =
-NavRoute(id: -1, path: "/redirection", name: "redirection");
-final onboardingRoute =
-NavRoute(id: -1, path: "/onboarding", name: "onboarding");
-final recipesRoute = NavRoute(id: 0, path: "/recipes", name: "recipes");
-final optionsRoute = NavRoute(id: 1, path: "/options", name: "options");
+final redirectionRoute = NavRoute(path: "/redirection", name: "redirection");
+final onboardingRoute = NavRoute(path: "/onboarding", name: "onboarding");
+final recipesRoute = NavRoute(path: "/recipes", name: "recipes");
+final optionsRoute = NavRoute(path: "/options", name: "options");
 
 final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
