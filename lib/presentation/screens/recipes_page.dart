@@ -1,32 +1,24 @@
 import 'dart:async';
 
-import 'package:provider/provider.dart';
+import 'package:fitsy/data/repositories/meal_plans_repository.dart';
+import 'package:fitsy/data/repositories/settings_repository.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
 
-import '../../data/database/app_box.dart';
-import '../../data/entities/meal_plan.dart';
-import '../../data/network/http_request.dart';
+import '../../domain/models/meal_plan.dart';
 
-class RecipesPage extends StatefulWidget {
-  const RecipesPage({
-    super.key,
-    required this.days,
-    required this.calories,
-    required this.budget,
-  });
-
-  final int days;
-  final int calories;
-  final int budget;
+class RecipesPage extends ConsumerStatefulWidget {
+  const RecipesPage({super.key});
 
   @override
-  State<RecipesPage> createState() => _RecipesPageState();
+  ConsumerState<RecipesPage> createState() => _RecipesPageState();
 }
 
-class _RecipesPageState extends State<RecipesPage> {
+class _RecipesPageState extends ConsumerState<RecipesPage> {
   final StreamController<List<MealPlan>> recipesController = StreamController();
-  late Stream<List<MealPlan>> _stream;
-  late AppBox appBox;
+  late final Stream<List<MealPlan>> _stream = recipesController.stream;
+  late MealPlansRepository menuRepository;
+  late SettingsRepository settings;
 
   @override
   void initState() {
@@ -35,11 +27,10 @@ class _RecipesPageState extends State<RecipesPage> {
   }
 
   _initRecipes() async {
-    appBox = context.read<AppBox>();
+    menuRepository = await ref.read(mealPlansRepositoryProvider.future);
+    settings = await ref.read(settingsRepositoryProvider.future);
 
-    _stream = recipesController.stream;
-
-    final dbPlans = await appBox.getAllMealPlans();
+    final dbPlans = await menuRepository.getDatabaseMealPlans();
     if (dbPlans.isEmpty) {
       _fetchRecipes();
     } else {
@@ -48,11 +39,9 @@ class _RecipesPageState extends State<RecipesPage> {
   }
 
   _fetchRecipes() async {
-    var requestBody = buildRequestBody(
-        buildPrompt(widget.days, widget.calories, widget.budget));
-    List<MealPlan> mealPlans = await sendGeminiRequest(requestBody);
+    List<MealPlan>? mealPlans = await menuRepository.fetchMeals(
+        settings.days, settings.calories, settings.budget);
     recipesController.sink.add(mealPlans);
-    appBox.replaceAllMealPlans(mealPlans);
   }
 
   @override

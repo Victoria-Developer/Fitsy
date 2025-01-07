@@ -1,7 +1,8 @@
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+@Riverpod(keepAlive: true)
 class SettingsRepository {
-
   late final SharedPreferences _preferences;
 
   final String _daysKey = "days";
@@ -40,3 +41,11 @@ class SettingsRepository {
     _preferences.setInt(_budgetKey, budget);
   }
 }
+
+// SettingsRepository prover used by rest of the app.
+final settingsRepositoryProvider =
+    FutureProvider<SettingsRepository>((ref) async {
+  final settingsRepository = SettingsRepository();
+  await settingsRepository.loadSettings();
+  return settingsRepository;
+});

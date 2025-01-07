@@ -14,25 +14,25 @@ import 'package:objectbox/internal.dart'
 import 'package:objectbox/objectbox.dart' as obx;
 import 'package:objectbox_flutter_libs/objectbox_flutter_libs.dart';
 
-import '../entities/meal_plan.dart';
-import '../entities/recipe.dart';
+import '../entities/meal_plan_entity.dart';
+import '../entities/recipe_entity.dart';
 
 export 'package:objectbox/objectbox.dart'; // so that callers only have to import this file
 
 final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
-      id: const obx_int.IdUid(1, 6719496625513008878),
-      name: 'MealPlan',
-      lastPropertyId: const obx_int.IdUid(2, 222508286148098768),
+      id: const obx_int.IdUid(1, 6593502449897551958),
+      name: 'MealPlanEntity',
+      lastPropertyId: const obx_int.IdUid(2, 959300171045859789),
       flags: 0,
       properties: <obx_int.ModelProperty>[
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(1, 8891874079131425183),
+            id: const obx_int.IdUid(1, 8737768684642307200),
             name: 'id',
             type: 6,
             flags: 1),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(2, 222508286148098768),
+            id: const obx_int.IdUid(2, 959300171045859789),
             name: 'dayId',
             type: 6,
             flags: 0)
@@ -40,51 +40,51 @@ final _entities = <obx_int.ModelEntity>[
       relations: <obx_int.ModelRelation>[],
       backlinks: <obx_int.ModelBacklink>[
         obx_int.ModelBacklink(
-            name: 'recipes', srcEntity: 'Recipe', srcField: 'mealPlan')
+            name: 'recipes', srcEntity: 'RecipeEntity', srcField: 'mealPlan')
       ]),
   obx_int.ModelEntity(
-      id: const obx_int.IdUid(2, 2323773367971043792),
-      name: 'Recipe',
-      lastPropertyId: const obx_int.IdUid(7, 3333572910343793667),
+      id: const obx_int.IdUid(2, 8716676049111621615),
+      name: 'RecipeEntity',
+      lastPropertyId: const obx_int.IdUid(7, 3980338306786492739),
       flags: 0,
       properties: <obx_int.ModelProperty>[
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(1, 7855596835509486918),
+            id: const obx_int.IdUid(1, 1098351602566429511),
             name: 'id',
             type: 6,
             flags: 1),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(2, 3745621742714782266),
-            name: 'mealId',
+            id: const obx_int.IdUid(2, 8358739920385078704),
+            name: 'recipeId',
             type: 6,
             flags: 0),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(3, 8416538083613502),
+            id: const obx_int.IdUid(3, 3916790370975533893),
             name: 'name',
             type: 9,
             flags: 0),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(4, 1077257197707958511),
+            id: const obx_int.IdUid(4, 9072000123215698101),
             name: 'instructions',
             type: 9,
             flags: 0),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(5, 3375101505032187899),
+            id: const obx_int.IdUid(5, 2929854740120179734),
             name: 'calories',
             type: 6,
             flags: 0),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(6, 1538050498258633714),
+            id: const obx_int.IdUid(6, 4141253335937653190),
             name: 'price',
             type: 8,
             flags: 0),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(7, 3333572910343793667),
+            id: const obx_int.IdUid(7, 3980338306786492739),
             name: 'mealPlanId',
             type: 11,
             flags: 520,
-            indexId: const obx_int.IdUid(1, 7406323545699297081),
-            relationTarget: 'MealPlan')
+            indexId: const obx_int.IdUid(1, 5783639048532475278),
+            relationTarget: 'MealPlanEntity')
       ],
       relations: <obx_int.ModelRelation>[],
       backlinks: <obx_int.ModelBacklink>[])
@@ -125,8 +125,8 @@ Future<obx.Store> openStore(
 obx_int.ModelDefinition getObjectBoxModel() {
   final model = obx_int.ModelInfo(
       entities: _entities,
-      lastEntityId: const obx_int.IdUid(2, 2323773367971043792),
-      lastIndexId: const obx_int.IdUid(1, 7406323545699297081),
+      lastEntityId: const obx_int.IdUid(2, 8716676049111621615),
+      lastIndexId: const obx_int.IdUid(1, 5783639048532475278),
       lastRelationId: const obx_int.IdUid(0, 0),
       lastSequenceId: const obx_int.IdUid(0, 0),
       retiredEntityUids: const [],
@@ -138,19 +138,19 @@ obx_int.ModelDefinition getObjectBoxModel() {
       version: 1);
 
   final bindings = <Type, obx_int.EntityDefinition>{
-    MealPlan: obx_int.EntityDefinition<MealPlan>(
+    MealPlanEntity: obx_int.EntityDefinition<MealPlanEntity>(
         model: _entities[0],
-        toOneRelations: (MealPlan object) => [],
-        toManyRelations: (MealPlan object) => {
-              obx_int.RelInfo<Recipe>.toOneBacklink(
-                      7, object.id, (Recipe srcObject) => srcObject.mealPlan):
+        toOneRelations: (MealPlanEntity object) => [],
+        toManyRelations: (MealPlanEntity object) => {
+              obx_int.RelInfo<RecipeEntity>.toOneBacklink(7, object.id,
+                      (RecipeEntity srcObject) => srcObject.mealPlan):
                   object.recipes
             },
-        getId: (MealPlan object) => object.id,
-        setId: (MealPlan object, int id) {
+        getId: (MealPlanEntity object) => object.id,
+        setId: (MealPlanEntity object, int id) {
           object.id = id;
         },
-        objectToFB: (MealPlan object, fb.Builder fbb) {
+        objectToFB: (MealPlanEntity object, fb.Builder fbb) {
           fbb.startTable(3);
           fbb.addInt64(0, object.id);
           fbb.addInt64(1, object.dayId);
@@ -162,24 +162,26 @@ obx_int.ModelDefinition getObjectBoxModel() {
           final rootOffset = buffer.derefObject(0);
           final dayIdParam =
               const fb.Int64Reader().vTableGet(buffer, rootOffset, 6, 0);
-          final object = MealPlan(dayId: dayIdParam)
+          final recipesParam = obx.ToMany<RecipeEntity>();
+          final object = MealPlanEntity(
+              dayId: dayIdParam, recipes: recipesParam)
             ..id = const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0);
-          obx_int.InternalToManyAccess.setRelInfo<MealPlan>(
+          obx_int.InternalToManyAccess.setRelInfo<MealPlanEntity>(
               object.recipes,
               store,
-              obx_int.RelInfo<Recipe>.toOneBacklink(
-                  7, object.id, (Recipe srcObject) => srcObject.mealPlan));
+              obx_int.RelInfo<RecipeEntity>.toOneBacklink(7, object.id,
+                  (RecipeEntity srcObject) => srcObject.mealPlan));
           return object;
         }),
-    Recipe: obx_int.EntityDefinition<Recipe>(
+    RecipeEntity: obx_int.EntityDefinition<RecipeEntity>(
         model: _entities[1],
-        toOneRelations: (Recipe object) => [object.mealPlan],
-        toManyRelations: (Recipe object) => {},
-        getId: (Recipe object) => object.id,
-        setId: (Recipe object, int id) {
+        toOneRelations: (RecipeEntity object) => [object.mealPlan],
+        toManyRelations: (RecipeEntity object) => {},
+        getId: (RecipeEntity object) => object.id,
+        setId: (RecipeEntity object, int id) {
           object.id = id;
         },
-        objectToFB: (Recipe object, fb.Builder fbb) {
+        objectToFB: (RecipeEntity object, fb.Builder fbb) {
           final nameOffset =
               object.name == null ? null : fbb.writeString(object.name!);
           final instructionsOffset = object.instructions == null
@@ -199,7 +201,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
         objectFromFB: (obx.Store store, ByteData fbData) {
           final buffer = fb.BufferContext(fbData);
           final rootOffset = buffer.derefObject(0);
-          final mealIdParam =
+          final recipeIdParam =
               const fb.Int64Reader().vTableGetNullable(buffer, rootOffset, 6);
           final nameParam = const fb.StringReader(asciiOptimization: true)
               .vTableGetNullable(buffer, rootOffset, 8);
@@ -210,8 +212,8 @@ obx_int.ModelDefinition getObjectBoxModel() {
               const fb.Int64Reader().vTableGetNullable(buffer, rootOffset, 12);
           final priceParam = const fb.Float64Reader()
               .vTableGetNullable(buffer, rootOffset, 14);
-          final object = Recipe(
-              recipeId: mealIdParam,
+          final object = RecipeEntity(
+              recipeId: recipeIdParam,
               name: nameParam,
               instructions: instructionsParam,
               calories: caloriesParam,
@@ -227,48 +229,48 @@ obx_int.ModelDefinition getObjectBoxModel() {
   return obx_int.ModelDefinition(model, bindings);
 }
 
-/// [MealPlan] entity fields to define ObjectBox queries.
-class MealPlan_ {
-  /// See [MealPlan.id].
+/// [MealPlanEntity] entity fields to define ObjectBox queries.
+class MealPlanEntity_ {
+  /// See [MealPlanEntity.id].
   static final id =
-      obx.QueryIntegerProperty<MealPlan>(_entities[0].properties[0]);
+      obx.QueryIntegerProperty<MealPlanEntity>(_entities[0].properties[0]);
 
-  /// See [MealPlan.dayId].
+  /// See [MealPlanEntity.dayId].
   static final dayId =
-      obx.QueryIntegerProperty<MealPlan>(_entities[0].properties[1]);
+      obx.QueryIntegerProperty<MealPlanEntity>(_entities[0].properties[1]);
 
-  /// see [MealPlan.recipes]
-  static final recipes =
-      obx.QueryBacklinkToMany<Recipe, MealPlan>(Recipe_.mealPlan);
+  /// see [MealPlanEntity.recipes]
+  static final recipes = obx.QueryBacklinkToMany<RecipeEntity, MealPlanEntity>(
+      RecipeEntity_.mealPlan);
 }
 
-/// [Recipe] entity fields to define ObjectBox queries.
-class Recipe_ {
-  /// See [Recipe.id].
+/// [RecipeEntity] entity fields to define ObjectBox queries.
+class RecipeEntity_ {
+  /// See [RecipeEntity.id].
   static final id =
-      obx.QueryIntegerProperty<Recipe>(_entities[1].properties[0]);
+      obx.QueryIntegerProperty<RecipeEntity>(_entities[1].properties[0]);
 
-  /// See [Recipe.recipeId].
+  /// See [RecipeEntity.recipeId].
   static final recipeId =
-      obx.QueryIntegerProperty<Recipe>(_entities[1].properties[1]);
+      obx.QueryIntegerProperty<RecipeEntity>(_entities[1].properties[1]);
 
-  /// See [Recipe.name].
+  /// See [RecipeEntity.name].
   static final name =
-      obx.QueryStringProperty<Recipe>(_entities[1].properties[2]);
+      obx.QueryStringProperty<RecipeEntity>(_entities[1].properties[2]);
 
-  /// See [Recipe.instructions].
+  /// See [RecipeEntity.instructions].
   static final instructions =
-      obx.QueryStringProperty<Recipe>(_entities[1].properties[3]);
+      obx.QueryStringProperty<RecipeEntity>(_entities[1].properties[3]);
 
-  /// See [Recipe.calories].
+  /// See [RecipeEntity.calories].
   static final calories =
-      obx.QueryIntegerProperty<Recipe>(_entities[1].properties[4]);
+      obx.QueryIntegerProperty<RecipeEntity>(_entities[1].properties[4]);
 
-  /// See [Recipe.price].
+  /// See [RecipeEntity.price].
   static final price =
-      obx.QueryDoubleProperty<Recipe>(_entities[1].properties[5]);
+      obx.QueryDoubleProperty<RecipeEntity>(_entities[1].properties[5]);
 
-  /// See [Recipe.mealPlan].
-  static final mealPlan =
-      obx.QueryRelationToOne<Recipe, MealPlan>(_entities[1].properties[6]);
+  /// See [RecipeEntity.mealPlan].
+  static final mealPlan = obx.QueryRelationToOne<RecipeEntity, MealPlanEntity>(
+      _entities[1].properties[6]);
 }

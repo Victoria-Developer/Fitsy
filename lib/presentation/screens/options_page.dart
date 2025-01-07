@@ -1,48 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/repositories/settings_repository.dart';
 import '../widgets/outlined_text_field.dart';
 
-class OptionsPage extends StatefulWidget {
+class OptionsPage extends ConsumerStatefulWidget {
   const OptionsPage({super.key, required this.onNavigateToRecipesPage});
 
-  final void Function(int, int, int) onNavigateToRecipesPage;
+  final void Function() onNavigateToRecipesPage;
 
   @override
-  State<OptionsPage> createState() => _OptionsPagePageState();
+  ConsumerState<OptionsPage> createState() => _OptionsPageState();
 }
 
-class _OptionsPagePageState extends State<OptionsPage> {
-  final daysList = [1, 2, 3, 4, 5, 6, 7];
+class _OptionsPageState extends ConsumerState<OptionsPage> {
+  final daysList = List.generate(7, (index) => index + 1);
   late SettingsRepository settingsRepository;
   late int days, calories, budget;
+  bool isLoading = true;
 
   @override
   initState() {
-    settingsRepository = context.read<SettingsRepository>();
-    days = settingsRepository.days;
-    calories = settingsRepository.calories;
-    budget = settingsRepository.budget;
+    _initSettings();
     super.initState();
   }
 
-  _setDays(int days) {
+  _initSettings() async {
+    settingsRepository = await ref.read(settingsRepositoryProvider.future);
     setState(() {
-      this.days = days;
-    });
-  }
-
-  _setCalories(int calories) {
-    setState(() {
-      this.calories = calories;
-    });
-  }
-
-  _setBudget(int budget) {
-    setState(() {
-      this.budget = budget;
+      days = settingsRepository.days;
+      calories = settingsRepository.calories;
+      budget = settingsRepository.budget;
+      isLoading = false;
     });
   }
 
@@ -50,54 +40,55 @@ class _OptionsPagePageState extends State<OptionsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
         body: Center(
-            child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Wrap(
-          crossAxisAlignment: WrapCrossAlignment.center,
-          direction: Axis.horizontal,
-          spacing: 20, // <-- Spacing between children
-          children: <Widget>[
-            const Text('Meal plan for'),
-            _buildDropDownDaysList(),
-            const Text('days')
-          ],
-        ),
-        const SizedBox(height: 20),
-        const Text('Calories per day:'),
-        OutlinedTextField(
-            initialValue: calories.toString(),
-            hintText: '1400',
-            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            onEdit: (value) {
-              _setCalories(int.parse(value));
-            }),
-        const SizedBox(height: 20),
-        const Text('Budget per day in usd:'),
-        OutlinedTextField(
-            initialValue: budget.toString(),
-            hintText: '500',
-            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            onEdit: (value) {
-              _setBudget(int.parse(value));
-            }),
-        const SizedBox(height: 20),
-        ElevatedButton(
-          onPressed: () {
-            settingsRepository.setDays(days);
-            settingsRepository.setCalories(calories);
-            settingsRepository.setBudget(budget);
-            // Send data to recipes screen
-            widget.onNavigateToRecipesPage(days, calories, budget);
-          },
-          child: const Text('Ok'),
-        ),
-      ],
-    )));
+            child:
+                isLoading ? CircularProgressIndicator() : _buildMainContent()));
   }
 
-  Widget _buildDropDownDaysList() {
+  Widget _buildMainContent() {
+    return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
+            direction: Axis.horizontal,
+            spacing: 20, // <-- Spacing between children
+            children: <Widget>[
+              const Text('Meal plan for'),
+              _buildDropDownDaysList(),
+              const Text('days')
+            ],
+          ),
+          _buildNumericTextField('Calories per day:', calories, '1400',
+              (value) {
+            calories = value;
+          }),
+          _buildNumericTextField('Budget per day in usd', budget, '500',
+              (value) {
+            budget = value;
+          }),
+          const SizedBox(height: 20),
+          _buildSubmitButton()
+        ]);
+  }
+
+  Widget _buildNumericTextField(String label, int initialValue, String hintText,
+      ValueChanged<int> onChanged) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 20),
+        Text(label),
+        OutlinedTextField(
+            initialValue: initialValue.toString(),
+            hintText: hintText,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            onEdit: (value) => onChanged(int.parse(value))),
+      ],
+    );
+  }
+
+  DropdownButton<int> _buildDropDownDaysList() {
     return DropdownButton<int>(
       value: days,
       items: daysList.map((int value) {
@@ -109,9 +100,26 @@ class _OptionsPagePageState extends State<OptionsPage> {
           ),
         );
       }).toList(),
-      onChanged: (int? value) {
-        _setDays(value!);
-      },
+      onChanged: (int? value) => setState(() => days = value?? days),
     );
   }
+
+  Widget _buildSubmitButton(){
+    return ElevatedButton(
+      onPressed: () {
+        settingsRepository
+          ..setDays(days)
+          ..setCalories(calories)
+          ..setBudget(budget);
+
+        if (settingsRepository.isFirstLaunch) {
+          settingsRepository.setFirstLaunch(false);
+        }
+        // Send data to recipes screen
+        widget.onNavigateToRecipesPage();
+      },
+      child: const Text('Save'),
+    );
+  }
+
 }

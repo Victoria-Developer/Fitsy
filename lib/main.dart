@@ -1,58 +1,69 @@
-import 'package:fitsy/data/repositories/settings_repository.dart';
 import 'package:fitsy/presentation/navigation/app_navigator.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'data/database/app_box.dart';
-
-Future<void> main() async {
+main() {
   // This is required so ObjectBox can get the application directory
   // to store the database in.
   WidgetsFlutterBinding.ensureInitialized();
-  final appBox = await AppBox.create();
-
-  final settingsRepository = SettingsRepository();
-  await settingsRepository.loadSettings();
-
-  runApp(MultiProvider(
-    providers: [
-      Provider<AppBox>(create: (_) => appBox),
-      Provider<SettingsRepository>(create: (_) => settingsRepository),
-    ],
+  runApp(ProviderScope(
     child: App(),
   ));
 }
 
-class App extends StatefulWidget {
+class App extends ConsumerStatefulWidget {
   const App({super.key});
 
   @override
-  State<StatefulWidget> createState() => _AppState();
+  ConsumerState<App> createState() => _AppState();
 }
 
-class _AppState extends State<App> {
-
-  late final AppNavigator navigation;
-
+class _AppState extends ConsumerState<App> {
   @override
   void initState() {
-    navigation = AppNavigator(context);
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
+    final router = ref.read(routerProvider);
     return MaterialApp.router(
+      debugShowCheckedModeBanner: false,
       title: 'Fitsy',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.lime.shade100),
-        textTheme: TextTheme(
-          bodyMedium: TextStyle(fontSize: screenWidth * 0.05), // Regular text
-        ),
-        useMaterial3: true,
+      theme: getAppThemeData(),
+      routerConfig: router,
+    );
+  }
+
+  ThemeData getAppThemeData(){
+    final fontSize = MediaQuery.of(context).size.width * 0.05;
+    return ThemeData(
+      colorScheme: const ColorScheme(
+        brightness: Brightness.light,
+        primary: Color(0xFFB8860B),
+        // Button selected text color
+        onPrimary: Colors.black,
+        secondary: Colors.black,
+        onSecondary: Colors.black,
+        surface: Color(0xFFA4B494),
+        // Background
+        onSurface: Colors.black,
+        // Text color
+        error: Color(0xFFFF5252),
+        // Error color
+        onError: Colors.white, // Text on error color
       ),
-      routerConfig: navigation.router,
+      elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            textStyle: TextStyle(fontSize: fontSize),
+            backgroundColor: Color(0xFF8A9C81), // Button background color
+            foregroundColor: Colors.black, // Text color
+          )),
+      textTheme: TextTheme(
+          bodyMedium:
+          TextStyle(fontSize: fontSize)
+      ),
+      useMaterial3: true,
     );
   }
 }
