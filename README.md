@@ -4,6 +4,7 @@ AI powered meal planning app for mobile devices.
 <img src="https://github.com/user-attachments/assets/cc27adf9-baf2-4adf-a41b-5e453ab81c73" width="300" height="700" />
 
 <img src="https://github.com/user-attachments/assets/22462ebb-aa07-42c2-b7c5-a65ffd81aecb" width="300" height="700" />
+
 ***
 
 Choose options like daily calories intake, budget per day and days amount on the Options screen.
