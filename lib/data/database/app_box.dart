@@ -1,16 +1,16 @@
+import 'package:fitsy/data/entities/recipe_entity.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
-import '../entities/meal_plan_entity.dart';
 import 'objectbox.g.dart'; // created by `flutter pub run build_runner build`
 
 class AppBox {
   // The Store of this app.
   late final Store _store;
-  late final Box<MealPlanEntity> _mealPlans;
+  late final Box<RecipeEntity> _recipesBox;
 
   AppBox._create(this._store) {
-    _mealPlans = Box<MealPlanEntity>(_store);
+    _recipesBox = Box<RecipeEntity>(_store);
   }
 
   // Create an instance of ObjectBox to use throughout the app.
@@ -22,10 +22,10 @@ class AppBox {
     return AppBox._create(store);
   }
 
-  Future<List<MealPlanEntity>> getAllMealPlans() => _mealPlans.getAllAsync();
+  Future<List<RecipeEntity>> getAllMealPlans() => _recipesBox.getAllAsync();
 
-  void replaceAllMealPlans(List<MealPlanEntity> plans) async {
-    _mealPlans.removeAll();
-    _mealPlans.putMany(plans);
+  void replaceAllMealPlans(List<RecipeEntity> plans) async {
+    _recipesBox.removeAll();
+    _recipesBox.putMany(plans);
   }
 }

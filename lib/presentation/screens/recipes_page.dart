@@ -1,11 +1,11 @@
 import 'dart:async';
 
-import 'package:fitsy/data/repositories/meal_plans_repository.dart';
+import 'package:fitsy/data/repositories/recipes_repository.dart';
 import 'package:fitsy/data/repositories/settings_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
 
-import '../../domain/models/meal_plan.dart';
+import '../../domain/models/recipe.dart';
 
 class RecipesPage extends ConsumerStatefulWidget {
   const RecipesPage({super.key});
@@ -15,9 +15,10 @@ class RecipesPage extends ConsumerStatefulWidget {
 }
 
 class _RecipesPageState extends ConsumerState<RecipesPage> {
-  final StreamController<List<MealPlan>> recipesController = StreamController();
-  late final Stream<List<MealPlan>> _stream = recipesController.stream;
-  late MealPlansRepository menuRepository;
+  final StreamController<List<List<Recipe>>> recipesController =
+      StreamController();
+  late final Stream<List<List<Recipe>>> _stream = recipesController.stream;
+  late RecipesRepository recipesRepository;
   late SettingsRepository settings;
 
   @override
@@ -27,10 +28,10 @@ class _RecipesPageState extends ConsumerState<RecipesPage> {
   }
 
   _initRecipes() async {
-    menuRepository = await ref.read(mealPlansRepositoryProvider.future);
+    recipesRepository = await ref.read(mealPlansRepositoryProvider.future);
     settings = await ref.read(settingsRepositoryProvider.future);
 
-    final dbPlans = await menuRepository.getDatabaseMealPlans();
+    final dbPlans = await recipesRepository.getDatabaseMealPlans();
     if (dbPlans.isEmpty) {
       _fetchRecipes();
     } else {
@@ -39,7 +40,7 @@ class _RecipesPageState extends ConsumerState<RecipesPage> {
   }
 
   _fetchRecipes() async {
-    List<MealPlan>? mealPlans = await menuRepository.fetchMeals(
+    List<List<Recipe>>? mealPlans = await recipesRepository.fetchMeals(
         settings.days, settings.calories, settings.budget);
     recipesController.sink.add(mealPlans);
   }
@@ -48,7 +49,7 @@ class _RecipesPageState extends ConsumerState<RecipesPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-          child: StreamBuilder<List<MealPlan>>(
+          child: StreamBuilder<List<List<Recipe>>>(
         stream: _stream,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -82,20 +83,20 @@ class _RecipesPageState extends ConsumerState<RecipesPage> {
     );
   }
 
-  SizedBox _buildMealPlanCard(MealPlan mealPlan) {
+  SizedBox _buildMealPlanCard(List<Recipe> mealPlan) {
     return SizedBox(
         width: MediaQuery.of(context).size.width,
         child: Card(
             child: SingleChildScrollView(
           child: Column(
             children: [
-              Text("Day ${mealPlan.dayId}"),
+              Text("Day ${mealPlan.first.dayId}"),
               Column(
-                  children: mealPlan.recipes.map((recipe) {
+                  children: mealPlan.map((recipe) {
                 return Column(children: [
-                  // Text(recipe.recipeId.toString()),
-                  Text(recipe.name!),
-                  Text(recipe.instructions!),
+                  Text(recipe.mealType.toString()),
+                  Text(recipe.name.toString()),
+                  Text(recipe.instructions.toString()),
                   Text("${recipe.calories.toString()} calories"),
                   Text("${recipe.price.toString()} \$"),
                   const Divider(height: 50, thickness: 1)

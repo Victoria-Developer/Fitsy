@@ -4,74 +4,52 @@
   "_note3": "If you have VCS merge conflicts, you must resolve them according to ObjectBox docs.",
   "entities": [
     {
-      "id": "1:6593502449897551958",
-      "lastPropertyId": "2:959300171045859789",
-      "name": "MealPlanEntity",
-      "properties": [
-        {
-          "id": "1:8737768684642307200",
-          "name": "id",
-          "type": 6,
-          "flags": 1
-        },
-        {
-          "id": "2:959300171045859789",
-          "name": "dayId",
-          "type": 6
-        }
-      ],
-      "relations": []
-    },
-    {
-      "id": "2:8716676049111621615",
-      "lastPropertyId": "7:3980338306786492739",
+      "id": "1:8823790866709140877",
+      "lastPropertyId": "7:6563587726487438878",
       "name": "RecipeEntity",
       "properties": [
         {
-          "id": "1:1098351602566429511",
+          "id": "1:7385528326445958384",
           "name": "id",
           "type": 6,
           "flags": 1
         },
         {
-          "id": "2:8358739920385078704",
-          "name": "recipeId",
+          "id": "2:6134963302973389607",
+          "name": "dayId",
           "type": 6
         },
         {
-          "id": "3:3916790370975533893",
+          "id": "3:4540356496404038735",
+          "name": "mealType",
+          "type": 9
+        },
+        {
+          "id": "4:2458236138434365816",
           "name": "name",
           "type": 9
         },
         {
-          "id": "4:9072000123215698101",
+          "id": "5:6586697536013838998",
           "name": "instructions",
           "type": 9
         },
         {
-          "id": "5:2929854740120179734",
+          "id": "6:8464907476627541996",
           "name": "calories",
           "type": 6
         },
         {
-          "id": "6:4141253335937653190",
+          "id": "7:6563587726487438878",
           "name": "price",
           "type": 8
-        },
-        {
-          "id": "7:3980338306786492739",
-          "name": "mealPlanId",
-          "type": 11,
-          "flags": 520,
-          "indexId": "1:5783639048532475278",
-          "relationTarget": "MealPlanEntity"
         }
       ],
       "relations": []
     }
   ],
-  "lastEntityId": "2:8716676049111621615",
-  "lastIndexId": "1:5783639048532475278",
+  "lastEntityId": "1:8823790866709140877",
+  "lastIndexId": "0:0",
   "lastRelationId": "0:0",
   "lastSequenceId": "0:0",
   "modelVersion": 5,
