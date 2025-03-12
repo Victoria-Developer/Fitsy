@@ -91,6 +91,7 @@ class _OptionsPageState extends ConsumerState<OptionsPage> {
   DropdownButton<int> _buildDropDownDaysList() {
     return DropdownButton<int>(
       value: days,
+      dropdownColor: Color(0xFFB8C4A8),
       items: daysList.map((int value) {
         return DropdownMenuItem<int>(
           value: value,
@@ -100,11 +101,11 @@ class _OptionsPageState extends ConsumerState<OptionsPage> {
           ),
         );
       }).toList(),
-      onChanged: (int? value) => setState(() => days = value?? days),
+      onChanged: (int? value) => setState(() => days = value ?? days),
     );
   }
 
-  Widget _buildSubmitButton(){
+  Widget _buildSubmitButton() {
     return ElevatedButton(
       onPressed: () {
         settingsRepository
@@ -121,5 +122,4 @@ class _OptionsPageState extends ConsumerState<OptionsPage> {
       child: const Text('Save'),
     );
   }
-
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class FitsyTheme {
-  ThemeData getMaterialTheme(BuildContext context){
+  ThemeData getMaterialTheme(BuildContext context) {
     final fontSize = MediaQuery.of(context).size.width * 0.05;
     return ThemeData(
       colorScheme: const ColorScheme(
@@ -21,14 +21,14 @@ class FitsyTheme {
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            textStyle: TextStyle(fontSize: fontSize),
-            backgroundColor: Color(0xFF8A9C81), // Button background color
-            foregroundColor: Colors.black, // Text color
-          )),
-      textTheme: TextTheme(
-          bodyMedium:
-          TextStyle(fontSize: fontSize)
-      ),
+        textStyle: TextStyle(fontSize: fontSize),
+        backgroundColor: Color(0xFF8A9C81), // Button background color
+        foregroundColor: Colors.black, // Text color
+      )),
+      textTheme: TextTheme(bodyMedium: TextStyle(fontSize: fontSize)),
+      cardTheme: CardTheme(color: Color(0xFFB8C4A8)),
+      inputDecorationTheme:
+          InputDecorationTheme(fillColor: Color(0xFFB8C4A8), filled: true),
       useMaterial3: true,
     );
   }
