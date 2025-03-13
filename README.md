@@ -7,10 +7,10 @@ AI powered meal planning app for mobile devices.
 
 ***
 
-Choose options like daily calories intake, budget per day and days amount on the Options screen.
+Choose options like weight, height, budget per day and days amount on the Options screen.
 Meal plans are available on the Home Screen, user can check menu for every day by swapping cards horizontally. 
 Options for plan generation can be changed any time.
 
-<img src="https://github.com/user-attachments/assets/b52367b1-94dc-49cb-8c09-fbd4f81c85f2" width="300" height="700" />
+<img src="https://github.com/user-attachments/assets/f44d05b9-e7eb-4faa-ad0d-b209b8ba74dd" width="300" height="700" />
 
-<img src="https://github.com/user-attachments/assets/1a04c98d-e6a8-49c4-8558-66e9a80c5f56" width="300" height="700" />
+<img src="https://github.com/user-attachments/assets/69e35f00-4d80-4cb8-a8c0-abba8a974546" width="300" height="700" />
