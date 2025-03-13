@@ -60,17 +60,17 @@ String _buildMenuPrompt(int daysNumber, int calories, int budget) {
     Describe recipes in detail with all ingredients measurements.
     Do not repeat recipe names, and ensure that each recipe is distinct from others.
     Don't mention meal name like 'breakfast' in 'recipe_name'.
-    {
-        "day_id":{
-              [{ 
+        {
+            "recipes":[
+                { 
                 'meal_type': {'type': 'string'},
                 'day_id': {'type': 'int'},
                 'recipe_name': {'type': 'string'},
                 'recipe': {'type': 'string'},
                 'calories': {'type': 'int'},
                 'usd_price': {'type': 'int'}
-              }]
-        }
-    }    
+                }
+            ]
+        }    
     """;
 }

@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/repositories/settings_repository.dart';
+import '../../domain/enums/activity.dart';
+import '../../domain/enums/gender.dart';
 import '../widgets/outlined_text_field.dart';
 
 class OptionsPage extends ConsumerStatefulWidget {
@@ -17,7 +19,9 @@ class OptionsPage extends ConsumerStatefulWidget {
 class _OptionsPageState extends ConsumerState<OptionsPage> {
   final daysList = List.generate(7, (index) => index + 1);
   late SettingsRepository settingsRepository;
-  late int days, calories, budget;
+  late int days, budget, calories, weight, height, age;
+  late Gender gender;
+  late Activity activity;
   bool isLoading = true;
 
   @override
@@ -32,6 +36,13 @@ class _OptionsPageState extends ConsumerState<OptionsPage> {
       days = settingsRepository.days;
       calories = settingsRepository.calories;
       budget = settingsRepository.budget;
+
+      weight = settingsRepository.weight;
+      height = settingsRepository.height;
+      age = settingsRepository.age;
+      gender = settingsRepository.gender;
+      activity = settingsRepository.activity;
+
       isLoading = false;
     });
   }
@@ -39,9 +50,16 @@ class _OptionsPageState extends ConsumerState<OptionsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Center(
-            child:
-                isLoading ? CircularProgressIndicator() : _buildMainContent()));
+      body: SingleChildScrollView(
+        child: Container(
+          height: MediaQuery.of(context).size.height, // Full height
+          alignment: Alignment.center, // Centers the content
+          child: isLoading
+              ? CircularProgressIndicator()
+              : _buildMainContent(),
+        ),
+      ),
+    );
   }
 
   Widget _buildMainContent() {
@@ -55,18 +73,44 @@ class _OptionsPageState extends ConsumerState<OptionsPage> {
             spacing: 20, // <-- Spacing between children
             children: <Widget>[
               const Text('Meal plan for'),
-              _buildDropDownDaysList(),
+              _buildDropDownList(days, daysList, (value) => days = value,
+                  (value) => value.toString()),
               const Text('days')
             ],
           ),
-          _buildNumericTextField('Calories per day:', calories, '1400',
-              (value) {
-            calories = value;
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text('Gender: '),
+              _buildDropDownList(gender, Gender.values,
+                  (value) => gender = value, (value) => value.name),
+            ],
+          ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text("Exercises intensity: "),
+              _buildDropDownList(activity, Activity.values,
+                  (value) => activity = value, (value) => value.name)
+            ],
+          ),
+          _buildNumericTextField('Age', age, '25', (value) {
+            age = value;
           }),
-          _buildNumericTextField('Budget per day in usd', budget, '500',
+          _buildNumericTextField('Weight (kg)', weight, '77', (value) {
+            weight = value;
+          }),
+          _buildNumericTextField('Height (cm)', height, '180', (value) {
+            height = value;
+          }),
+          _buildNumericTextField('Budget per day (usd)', budget, '500',
               (value) {
             budget = value;
           }),
+          const SizedBox(height: 20),
+          Text("$calories kcal recommended per day"),
           const SizedBox(height: 20),
           _buildSubmitButton()
         ]);
@@ -88,20 +132,26 @@ class _OptionsPageState extends ConsumerState<OptionsPage> {
     );
   }
 
-  DropdownButton<int> _buildDropDownDaysList() {
-    return DropdownButton<int>(
-      value: days,
+  DropdownButton<T> _buildDropDownList<T>(T listValue, List<T> list,
+      void Function(T) onChanged, String Function(T) toString) {
+    return DropdownButton<T>(
+      value: listValue,
       dropdownColor: Color(0xFFB8C4A8),
-      items: daysList.map((int value) {
-        return DropdownMenuItem<int>(
+      items: list.map<DropdownMenuItem<T>>((T value) {
+        // Explicit generic type
+        return DropdownMenuItem<T>(
           value: value,
           child: Text(
-            value.toString(),
+            toString(value),
             style: Theme.of(context).textTheme.bodyMedium,
           ),
         );
       }).toList(),
-      onChanged: (int? value) => setState(() => days = value ?? days),
+      onChanged: (T? value) {
+        if (value != null) {
+          setState(() => onChanged(value)); // Updates the actual state variable
+        }
+      },
     );
   }
 
@@ -110,14 +160,23 @@ class _OptionsPageState extends ConsumerState<OptionsPage> {
       onPressed: () {
         settingsRepository
           ..setDays(days)
-          ..setCalories(calories)
-          ..setBudget(budget);
+          ..setBudget(budget)
+          ..setWeight(weight)
+          ..setHeight(height)
+          ..setAge(age)
+          ..setGender(gender)
+          ..setActivity(activity)
+          ..calculate();
+
+        setState(() {
+          calories = settingsRepository.calories;
+        });
 
         if (settingsRepository.isFirstLaunch) {
           settingsRepository.setFirstLaunch(false);
+          // Send data to recipes screen
+          widget.onNavigateToRecipesPage();
         }
-        // Send data to recipes screen
-        widget.onNavigateToRecipesPage();
       },
       child: const Text('Save'),
     );
