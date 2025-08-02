@@ -1,40 +1,39 @@
+import 'package:fitsy/data/repositories/recipes_repository.dart';
 import 'package:fitsy/presentation/navigation/app_navigator.dart';
-import 'package:fitsy/presentation/themes/fitsy_theme.dart';
+import 'package:fitsy/presentation/themes/material_theme.dart';
+import 'package:fitsy/presentation/themes/util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-main() {
-  // This is required so ObjectBox can get the application directory
-  // to store the database in.
+import 'data/repositories/settings_repository.dart';
+
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(ProviderScope(
-    child: App(),
-  ));
+  runApp(const ProviderScope(child: App()));
 }
 
-class App extends ConsumerStatefulWidget {
+@Riverpod(keepAlive: true)
+Future<void> appStartupProvider(Ref ref) async {
+  await ref.watch(settingsRepositoryProvider.future);
+  await ref.watch(mealPlansRepositoryProvider.future);
+}
+
+class App extends ConsumerWidget {
   const App({super.key});
 
   @override
-  ConsumerState<App> createState() => _AppState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final router = ref.watch(routerProvider);
 
-class _AppState extends ConsumerState<App> {
-  @override
-  void initState() {
-    super.initState();
-  }
+    final textTheme = createTextTheme(context, "Lato", "Lato");
+    final theme = MaterialTheme(textTheme);
 
-  @override
-  Widget build(BuildContext context) {
-    final router = ref.read(routerProvider);
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       title: 'Fitsy',
-      theme: FitsyTheme().getMaterialTheme(context),
+      theme: theme.darkMediumContrast(),
       routerConfig: router,
     );
   }
 }
-
-

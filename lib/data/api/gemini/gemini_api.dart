@@ -56,10 +56,10 @@ String _buildMenuPrompt(int daysNumber, int calories, int budget) {
     Give me recipes for $daysNumber days for 3 meals using this JSON schema. 
     Replace 'day_id' with the corresponding day number 
     (starting from `1` even if there is only one day). 
-    Replace 'meal_type' with an actual meal type (starting from `breakfast`).
+    Replace 'meal_type' with an actual meal type (starting from `Breakfast`).
     Describe recipes in detail with all ingredients measurements.
     Do not repeat recipe names, and ensure that each recipe is distinct from others.
-    Don't mention meal name like 'breakfast' in 'recipe_name'.
+    Don't mention meal name like 'Breakfast' in 'recipe_name'.
         {
             "recipes":[
                 { 

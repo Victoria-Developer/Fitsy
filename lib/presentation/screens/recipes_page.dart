@@ -4,8 +4,10 @@ import 'package:fitsy/data/repositories/recipes_repository.dart';
 import 'package:fitsy/data/repositories/settings_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../domain/models/recipe.dart';
+import '../../domain/models/settings.dart';
 
 class RecipesPage extends ConsumerStatefulWidget {
   const RecipesPage({super.key});
@@ -19,7 +21,7 @@ class _RecipesPageState extends ConsumerState<RecipesPage> {
       StreamController();
   late final Stream<List<List<Recipe>>> _stream = recipesController.stream;
   late RecipesRepository recipesRepository;
-  late SettingsRepository settings;
+  late Settings settings;
 
   @override
   void initState() {
@@ -29,7 +31,10 @@ class _RecipesPageState extends ConsumerState<RecipesPage> {
 
   _initRecipes() async {
     recipesRepository = await ref.read(mealPlansRepositoryProvider.future);
-    settings = await ref.read(settingsRepositoryProvider.future);
+    SettingsRepository settingsRepository = await ref.read(
+        settingsRepositoryProvider.future
+    );
+    settings = settingsRepository.settings;
 
     final dbPlans = await recipesRepository.getDatabaseMealPlans();
     if (dbPlans.isEmpty) {
@@ -74,12 +79,19 @@ class _RecipesPageState extends ConsumerState<RecipesPage> {
           }
         },
       )),
-      bottomNavigationBar: ElevatedButton(
-          onPressed: () {
-            recipesController.sink.add([]);
-            _fetchRecipes();
-          },
-          child: Text("Recalculate")),
+      bottomNavigationBar: Row(
+          mainAxisAlignment: MainAxisAlignment.center, // or start/end if you prefer
+          children: [
+              ElevatedButton(
+                onPressed: () {
+                  recipesController.sink.add([]);
+                  _fetchRecipes();
+                },
+                child: const Icon(Icons.refresh, size: 30),
+              ),
+
+          ],
+        )
     );
   }
 
@@ -90,20 +102,34 @@ class _RecipesPageState extends ConsumerState<RecipesPage> {
             child: SingleChildScrollView(
           child: Column(
             children: [
-              Text("Day ${mealPlan.first.dayId}"),
+              SizedBox(height: 10),
+              Text("Day ${mealPlan.first.dayId}",
+                style: GoogleFonts.playfairDisplay(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              )),
+              SizedBox(height: 10),
               Column(
                   children: mealPlan.map((recipe) {
                 return Column(children: [
-                  Text(recipe.mealType.toString()),
-                  Text(recipe.name.toString()),
-                  Text(recipe.instructions.toString()),
-                  Text("${recipe.calories.toString()} calories"),
-                  Text("${recipe.price.toString()} \$"),
-                  const Divider(height: 50, thickness: 1)
+                  const Divider(height: 50, thickness: 1),
+                  SizedBox(height: 10),
+                  Text("${recipe.name} (${recipe.mealType})",
+                      textAlign: TextAlign.center),
+                  SizedBox(height: 10),
+                  Text(
+                    recipe.instructions.toString(),
+                    textAlign: TextAlign.center,
+                    softWrap: true
+                  ),
+                  SizedBox(height: 10),
+                  Text("Calories ${recipe.calories.toString()}."),
+                  Text("Price ${recipe.price.toString()} \$.")
                 ]);
               }).toList())
             ],
           ),
-        )));
+        ))
+    );
   }
 }

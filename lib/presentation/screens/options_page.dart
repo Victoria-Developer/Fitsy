@@ -1,3 +1,4 @@
+import 'package:fitsy/domain/models/settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -19,9 +20,8 @@ class OptionsPage extends ConsumerStatefulWidget {
 class _OptionsPageState extends ConsumerState<OptionsPage> {
   final daysList = List.generate(7, (index) => index + 1);
   late SettingsRepository settingsRepository;
-  late int days, budget, calories, weight, height, age;
-  late Gender gender;
-  late Activity activity;
+  late Settings settings;
+
   bool isLoading = true;
 
   @override
@@ -33,16 +33,10 @@ class _OptionsPageState extends ConsumerState<OptionsPage> {
   _initSettings() async {
     settingsRepository = await ref.read(settingsRepositoryProvider.future);
     setState(() {
-      days = settingsRepository.days;
-      calories = settingsRepository.calories;
-      budget = settingsRepository.budget;
-
-      weight = settingsRepository.weight;
-      height = settingsRepository.height;
-      age = settingsRepository.age;
-      gender = settingsRepository.gender;
-      activity = settingsRepository.activity;
-
+      settings = settingsRepository.settings;
+      if (settings.isFirstLaunch) {
+        settings.isFirstLaunch = false;
+      }
       isLoading = false;
     });
   }
@@ -54,9 +48,7 @@ class _OptionsPageState extends ConsumerState<OptionsPage> {
         child: Container(
           height: MediaQuery.of(context).size.height, // Full height
           alignment: Alignment.center, // Centers the content
-          child: isLoading
-              ? CircularProgressIndicator()
-              : _buildMainContent(),
+          child: isLoading ? CircularProgressIndicator() : _buildMainContent(),
         ),
       ),
     );
@@ -64,116 +56,132 @@ class _OptionsPageState extends ConsumerState<OptionsPage> {
 
   Widget _buildMainContent() {
     return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Wrap(
-            crossAxisAlignment: WrapCrossAlignment.center,
-            direction: Axis.horizontal,
-            spacing: 20, // <-- Spacing between children
-            children: <Widget>[
-              const Text('Meal plan for'),
-              _buildDropDownList(days, daysList, (value) => days = value,
-                  (value) => value.toString()),
-              const Text('days')
-            ],
-          ),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text('Gender: '),
-              _buildDropDownList(gender, Gender.values,
-                  (value) => gender = value, (value) => value.name),
-            ],
-          ),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text("Exercises intensity: "),
-              _buildDropDownList(activity, Activity.values,
-                  (value) => activity = value, (value) => value.name)
-            ],
-          ),
-          _buildNumericTextField('Age', age, '25', (value) {
-            age = value;
-          }),
-          _buildNumericTextField('Weight (kg)', weight, '77', (value) {
-            weight = value;
-          }),
-          _buildNumericTextField('Height (cm)', height, '180', (value) {
-            height = value;
-          }),
-          _buildNumericTextField('Budget per day (usd)', budget, '500',
-              (value) {
-            budget = value;
-          }),
-          const SizedBox(height: 20),
-          Text("$calories kcal recommended per day"),
-          const SizedBox(height: 20),
-          _buildSubmitButton()
-        ]);
-  }
-
-  Widget _buildNumericTextField(String label, int initialValue, String hintText,
-      ValueChanged<int> onChanged) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
+        _padded(
+          _wrap([
+            const Text('Meal plan for: '),
+            _buildDropDownList(settings.days, daysList,
+                    (value) => settings.days = value, (value) => value.toString()),
+            const Text('days')
+          ]),
+        ),
+        _padded(
+          _wrap([
+            const Text("Gender: "),
+            _buildDropDownList(settings.gender, Gender.values,
+                    (value) => settings.gender = value, (value) => value.name),
+          ]),
+        ),
+        _padded(
+          _wrap([
+            const Text("Exercises intensity: "),
+            _buildDropDownList(settings.activity, Activity.values,
+                    (value) => settings.activity = value, (value) => value.name),
+          ]),
+        ),
+        _padded(_buildNumericTextField('Age:', settings.age, '25', (value) {
+          settings.age = value;
+        })),
+        _padded(_buildNumericTextField('Weight (kg):', settings.weight, '77',
+                (value) {
+              settings.weight = value;
+            })),
+        _padded(_buildNumericTextField('Height (cm):', settings.height, '180',
+                (value) {
+              settings.height = value;
+            })),
+        _padded(_buildNumericTextField(
+            'Budget per day (usd):', settings.budget, '500', (value) {
+          settings.budget = value;
+        })),
+        const SizedBox(height: 40),
+        Text("${settings.calories} kcal recommended per day",
+            style: const TextStyle(fontWeight: FontWeight.bold)),
         const SizedBox(height: 20),
-        Text(label),
-        OutlinedTextField(
-            initialValue: initialValue.toString(),
-            hintText: hintText,
-            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            onEdit: (value) => onChanged(int.parse(value))),
+        _buildSubmitButton()
       ],
     );
   }
 
-  DropdownButton<T> _buildDropDownList<T>(T listValue, List<T> list,
-      void Function(T) onChanged, String Function(T) toString) {
-    return DropdownButton<T>(
-      value: listValue,
-      dropdownColor: Color(0xFFB8C4A8),
-      items: list.map<DropdownMenuItem<T>>((T value) {
-        // Explicit generic type
-        return DropdownMenuItem<T>(
-          value: value,
-          child: Text(
-            toString(value),
-            style: Theme.of(context).textTheme.bodyMedium,
+  Widget _padded(Widget child) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        child: child,
+      );
+
+  Widget _wrap(List<Widget> children) => Wrap(
+      crossAxisAlignment: WrapCrossAlignment.center,
+      direction: Axis.horizontal,
+      spacing: 20, // <-- Spacing between children
+      children: children
+  );
+
+  Widget _buildNumericTextField(String label, int initialValue, String hintText,
+      ValueChanged<int> onChanged) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        SizedBox(
+          width: 100,
+          child: Text(label),
+        ),
+        const SizedBox(width: 10),
+        SizedBox(
+          width: 80,
+          child: OutlinedTextField(
+            initialValue: initialValue.toString(),
+            hintText: hintText,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            onEdit: (value) {
+              setState(() {
+                onChanged(int.parse(value));
+                settings.calories = settingsRepository.calculate();
+              });
+            },
           ),
-        );
-      }).toList(),
-      onChanged: (T? value) {
-        if (value != null) {
-          setState(() => onChanged(value)); // Updates the actual state variable
-        }
-      },
+        ),
+      ],
     );
+  }
+
+  Container _buildDropDownList<T>(
+    T listValue,
+    List<T> list,
+    void Function(T) onChanged,
+    String Function(T) toString,
+  ) {
+    return Container(
+        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(
+            color: Colors.white, borderRadius: BorderRadius.circular(10)),
+        child: DropdownButton<T>(
+          value: listValue,
+          items: list.map<DropdownMenuItem<T>>((T value) {
+            return DropdownMenuItem<T>(
+              value: value,
+              child: Text(toString(value)),
+            );
+          }).toList(),
+          onChanged: (T? value) {
+            if (value != null) {
+              setState(() {
+                onChanged(value);
+                settings.calories = settingsRepository.calculate();
+              });
+            }
+          },
+          dropdownColor: Colors.white,
+          underline: const SizedBox.shrink(),
+          iconEnabledColor: Colors.black,
+        ));
   }
 
   Widget _buildSubmitButton() {
     return ElevatedButton(
       onPressed: () {
-        settingsRepository
-          ..setDays(days)
-          ..setBudget(budget)
-          ..setWeight(weight)
-          ..setHeight(height)
-          ..setAge(age)
-          ..setGender(gender)
-          ..setActivity(activity)
-          ..calculate();
-
-        setState(() {
-          calories = settingsRepository.calories;
-        });
-
-        if (settingsRepository.isFirstLaunch) {
-          settingsRepository.setFirstLaunch(false);
+        settingsRepository.saveSettings();
+        if (settings.isFirstLaunch) {
           // Send data to recipes screen
           widget.onNavigateToRecipesPage();
         }

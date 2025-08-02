@@ -1,3 +1,4 @@
+import 'package:fitsy/data/repositories/settings_repository.dart';
 import 'package:fitsy/presentation/navigation/route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,37 +17,34 @@ final recipesRoute = NavRoute(path: "/recipes", name: "recipes");
 final optionsRoute = NavRoute(path: "/options", name: "options");
 
 final routerProvider = Provider<GoRouter>((ref) {
+  final settings = ref.watch(settingsRepositoryProvider);
   return GoRouter(
     navigatorKey: _rootNavigatorKey,
     initialLocation: redirectionRoute.path,
     routes: [
       GoRoute(
-        name: redirectionRoute.name,
-        path: redirectionRoute.path,
-        builder: (context, state) {
-          return RedirectionPage(
-            onNavigateToRecipesPage: () => context.goNamed(recipesRoute.name),
-            onNavigateToOnboardingPage: () =>
-                context.goNamed(onboardingRoute.name),
-          );
-        },
-      ),
-      GoRoute(
-        name: onboardingRoute.name,
-        path: onboardingRoute.path,
-        builder: (context, state) {
-          return OptionsPage(
-            onNavigateToRecipesPage: () => context.goNamed(recipesRoute.name),
-          );
-        },
-      ),
+          name: redirectionRoute.name,
+          path: redirectionRoute.path,
+          builder: (context, state) {
+            return RedirectionPage();
+          },
+          redirect: (context, state) {
+            if (settings is AsyncLoading || settings is AsyncError) {
+              return null;
+            }
+            final settingsValue = settings.value!;
+            if (settingsValue.settings.isFirstLaunch == true) {
+              return optionsRoute.path;
+            } else {
+              return recipesRoute.path;
+            }
+          }),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
           return Scaffold(
             body: SafeArea(child: navigationShell),
-            bottomNavigationBar: DynamicBottomBar(
-              navigationShell: navigationShell
-            ),
+            bottomNavigationBar:
+                DynamicBottomBar(navigationShell: navigationShell),
           );
         },
         branches: [
