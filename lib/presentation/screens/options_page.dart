@@ -20,88 +20,109 @@ class OptionsPage extends ConsumerStatefulWidget {
 class _OptionsPageState extends ConsumerState<OptionsPage> {
   final daysList = List.generate(7, (index) => index + 1);
   late SettingsRepository settingsRepository;
-  late Settings settings;
+  late Settings userData;
 
   bool isLoading = true;
 
   @override
   initState() {
-    _initSettings();
     super.initState();
+    _initSettings();
   }
 
   _initSettings() async {
     settingsRepository = await ref.read(settingsRepositoryProvider.future);
     setState(() {
-      settings = settingsRepository.settings;
-      if (settings.isFirstLaunch) {
-        settings.isFirstLaunch = false;
-      }
+      settingsRepository.copyOriginalData();
+      userData = settingsRepository.userData;
       isLoading = false;
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Container(
-          height: MediaQuery.of(context).size.height, // Full height
-          alignment: Alignment.center, // Centers the content
-          child: isLoading ? CircularProgressIndicator() : _buildMainContent(),
+      body: Center(
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _padded(
+                _wrap([
+                  const Text('Meal plan for: '),
+                  _buildDropDownList(
+                    userData.days,
+                    daysList,
+                    (value) => userData.days = value,
+                    (value) => value.toString(),
+                  ),
+                  const Text('days'),
+                ]),
+              ),
+              _padded(
+                _wrap([
+                  const Text("Gender: "),
+                  _buildDropDownList(
+                    userData.gender,
+                    Gender.values,
+                    (value) => userData.gender = value,
+                    (value) => value.name,
+                  ),
+                ]),
+              ),
+              _padded(
+                _wrap([
+                  const Text("Exercises intensity: "),
+                  _buildDropDownList(
+                    userData.activity,
+                    Activity.values,
+                    (value) => userData.activity = value,
+                    (value) => value.name,
+                  ),
+                ]),
+              ),
+              _padded(
+                _buildNumericTextField('Age:', userData.age, '25', (value) {
+                  userData.age = value;
+                }),
+              ),
+              _padded(
+                _buildNumericTextField('Weight (kg):', userData.weight, '77',
+                    (value) {
+                  userData.weight = value;
+                }),
+              ),
+              _padded(
+                _buildNumericTextField('Height (cm):', userData.height, '180',
+                    (value) {
+                  userData.height = value;
+                }),
+              ),
+              _padded(
+                _buildNumericTextField(
+                    'Budget per day (usd):', userData.budget, '500', (value) {
+                  userData.budget = value;
+                }),
+              )
+            ],
+          ),
         ),
       ),
-    );
-  }
-
-  Widget _buildMainContent() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        _padded(
-          _wrap([
-            const Text('Meal plan for: '),
-            _buildDropDownList(settings.days, daysList,
-                    (value) => settings.days = value, (value) => value.toString()),
-            const Text('days')
-          ]),
-        ),
-        _padded(
-          _wrap([
-            const Text("Gender: "),
-            _buildDropDownList(settings.gender, Gender.values,
-                    (value) => settings.gender = value, (value) => value.name),
-          ]),
-        ),
-        _padded(
-          _wrap([
-            const Text("Exercises intensity: "),
-            _buildDropDownList(settings.activity, Activity.values,
-                    (value) => settings.activity = value, (value) => value.name),
-          ]),
-        ),
-        _padded(_buildNumericTextField('Age:', settings.age, '25', (value) {
-          settings.age = value;
-        })),
-        _padded(_buildNumericTextField('Weight (kg):', settings.weight, '77',
-                (value) {
-              settings.weight = value;
-            })),
-        _padded(_buildNumericTextField('Height (cm):', settings.height, '180',
-                (value) {
-              settings.height = value;
-            })),
-        _padded(_buildNumericTextField(
-            'Budget per day (usd):', settings.budget, '500', (value) {
-          settings.budget = value;
-        })),
-        const SizedBox(height: 40),
-        Text("${settings.calories} kcal recommended per day",
-            style: const TextStyle(fontWeight: FontWeight.bold)),
-        const SizedBox(height: 20),
-        _buildSubmitButton()
-      ],
+      bottomNavigationBar: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            "${userData.calories} kcal recommended per day",
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 15),
+          _buildSubmitButton(),
+        ],
+      ),
     );
   }
 
@@ -114,8 +135,7 @@ class _OptionsPageState extends ConsumerState<OptionsPage> {
       crossAxisAlignment: WrapCrossAlignment.center,
       direction: Axis.horizontal,
       spacing: 20, // <-- Spacing between children
-      children: children
-  );
+      children: children);
 
   Widget _buildNumericTextField(String label, int initialValue, String hintText,
       ValueChanged<int> onChanged) {
@@ -136,7 +156,7 @@ class _OptionsPageState extends ConsumerState<OptionsPage> {
             onEdit: (value) {
               setState(() {
                 onChanged(int.parse(value));
-                settings.calories = settingsRepository.calculate();
+                userData.calories = settingsRepository.calculate();
               });
             },
           ),
@@ -167,7 +187,7 @@ class _OptionsPageState extends ConsumerState<OptionsPage> {
             if (value != null) {
               setState(() {
                 onChanged(value);
-                settings.calories = settingsRepository.calculate();
+                userData.calories = settingsRepository.calculate();
               });
             }
           },
@@ -180,11 +200,12 @@ class _OptionsPageState extends ConsumerState<OptionsPage> {
   Widget _buildSubmitButton() {
     return ElevatedButton(
       onPressed: () {
-        settingsRepository.saveSettings();
-        if (settings.isFirstLaunch) {
+        if (userData.isFirstLaunch) {
+          userData.isFirstLaunch = false;
           // Send data to recipes screen
           widget.onNavigateToRecipesPage();
         }
+        settingsRepository.saveSettings();
       },
       child: const Text('Save'),
     );

@@ -7,7 +7,6 @@ import 'package:go_router/go_router.dart';
 import '../screens/redirection_page.dart';
 import '../screens/options_page.dart';
 import '../screens/recipes_page.dart';
-import '../widgets/dynamic_bottom_bar.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -15,6 +14,8 @@ final redirectionRoute = NavRoute(path: "/redirection", name: "redirection");
 final onboardingRoute = NavRoute(path: "/onboarding", name: "onboarding");
 final recipesRoute = NavRoute(path: "/recipes", name: "recipes");
 final optionsRoute = NavRoute(path: "/options", name: "options");
+
+int currentNavIndex = 0;
 
 final routerProvider = Provider<GoRouter>((ref) {
   final settings = ref.watch(settingsRepositoryProvider);
@@ -33,9 +34,11 @@ final routerProvider = Provider<GoRouter>((ref) {
               return null;
             }
             final settingsValue = settings.value!;
-            if (settingsValue.settings.isFirstLaunch == true) {
+            if (settingsValue.userData.isFirstLaunch == true) {
+              currentNavIndex = 1;
               return optionsRoute.path;
             } else {
+              currentNavIndex = 0;
               return recipesRoute.path;
             }
           }),
@@ -43,8 +46,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state, navigationShell) {
           return Scaffold(
             body: SafeArea(child: navigationShell),
-            bottomNavigationBar:
-                DynamicBottomBar(navigationShell: navigationShell),
+            bottomNavigationBar: _buildNavBar(context),
           );
         },
         branches: [
@@ -53,20 +55,16 @@ final routerProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 name: recipesRoute.name,
                 path: recipesRoute.path,
-                builder: (context, state) => RecipesPage(),
+                pageBuilder: (context, state) => _transition(RecipesPage()),
               ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: [
               GoRoute(
                 name: optionsRoute.name,
                 path: optionsRoute.path,
-                builder: (context, state) => OptionsPage(
+                pageBuilder: (context, state) => _transition(OptionsPage(
                   onNavigateToRecipesPage: () =>
                       context.goNamed(recipesRoute.name),
-                ),
-              ),
+                )),
+              )
             ],
           ),
         ],
@@ -74,3 +72,48 @@ final routerProvider = Provider<GoRouter>((ref) {
     ],
   );
 });
+
+CustomTransitionPage _transition(Widget child){
+  return CustomTransitionPage(
+    child: child,
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      return FadeTransition(
+        opacity:
+        CurveTween(curve: Curves.easeInOutCirc).animate(animation),
+        child: child,
+      );
+    },
+  );
+}
+
+Widget _buildNavBar(BuildContext context) {
+  return BottomAppBar(
+    shape: const CircularNotchedRectangle(),
+    notchMargin: 5.0,
+    clipBehavior: Clip.antiAlias,
+    child: SizedBox(
+      height: kBottomNavigationBarHeight,
+      child: Row(
+        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: <Widget>[
+          _buildIconButton(const Icon(Icons.home), 0,
+              () => context.replaceNamed(recipesRoute.name)),
+          _buildIconButton(const Icon(Icons.settings), 1,
+              () => context.replaceNamed(optionsRoute.name)),
+        ],
+      ),
+    ),
+  );
+}
+
+IconButton _buildIconButton(Icon icon, int index, onNavigation) {
+  return IconButton(
+      icon: icon,
+      iconSize: 30.0,
+      isSelected: currentNavIndex == index,
+      onPressed: () {
+        currentNavIndex = index;
+        onNavigation();
+      });
+}

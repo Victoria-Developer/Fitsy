@@ -21,7 +21,7 @@ class _RecipesPageState extends ConsumerState<RecipesPage> {
       StreamController();
   late final Stream<List<List<Recipe>>> _stream = recipesController.stream;
   late RecipesRepository recipesRepository;
-  late Settings settings;
+  late Settings userData;
 
   @override
   void initState() {
@@ -34,7 +34,7 @@ class _RecipesPageState extends ConsumerState<RecipesPage> {
     SettingsRepository settingsRepository = await ref.read(
         settingsRepositoryProvider.future
     );
-    settings = settingsRepository.settings;
+    userData = settingsRepository.userData;
 
     final dbPlans = await recipesRepository.getDatabaseMealPlans();
     if (dbPlans.isEmpty) {
@@ -46,12 +46,13 @@ class _RecipesPageState extends ConsumerState<RecipesPage> {
 
   _fetchRecipes() async {
     List<List<Recipe>>? mealPlans = await recipesRepository.fetchMeals(
-        settings.days, settings.calories, settings.budget);
+        userData.days, userData.calories, userData.budget);
     recipesController.sink.add(mealPlans);
   }
 
   @override
   Widget build(BuildContext context) {
+    print("REBUILD RECIPES");
     return Scaffold(
       body: Center(
           child: StreamBuilder<List<List<Recipe>>>(

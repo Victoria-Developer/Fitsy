@@ -18,45 +18,52 @@ class SettingsRepository {
   final String _activityLevelKey = "activity";
   final String _isFirstLaunchKey = "is_first_launch";
 
-  final Settings settings = Settings();
+  final Settings originalUserData = Settings();
+  final Settings userData = Settings();
 
   loadSettings() async {
     _preferences = await SharedPreferences.getInstance();
 
-    settings.days = _preferences.getInt(_daysKey) ?? 1;
-    settings.calories = _preferences.getInt(_caloriesKey) ?? 1775;
-    settings.budget = _preferences.getInt(_budgetKey) ?? 100;
+    originalUserData.days = _preferences.getInt(_daysKey) ?? 1;
+    originalUserData.calories = _preferences.getInt(_caloriesKey) ?? 1775;
+    originalUserData.budget = _preferences.getInt(_budgetKey) ?? 100;
 
-    settings.weight = _preferences.getInt(_weightKey) ?? 77;
-    settings.height = _preferences.getInt(_heightKey) ?? 180;
-    settings.age = _preferences.getInt(_ageKey) ?? 25;
-    settings.gender = Gender.values.byName(_preferences.getString(_genderKey) ?? "male");
-    settings.activity = Activity.values
+    originalUserData.weight = _preferences.getInt(_weightKey) ?? 77;
+    originalUserData.height = _preferences.getInt(_heightKey) ?? 180;
+    originalUserData.age = _preferences.getInt(_ageKey) ?? 25;
+    originalUserData.gender = Gender.values.byName(_preferences.getString(_genderKey) ?? "male");
+    originalUserData.activity = Activity.values
         .byName(_preferences.getString(_activityLevelKey) ?? "light");
 
-    settings.isFirstLaunch = _preferences.getBool(_isFirstLaunchKey) ?? true;
+    originalUserData.isFirstLaunch = _preferences.getBool(_isFirstLaunchKey) ?? true;
+    copyOriginalData();
+  }
+
+  copyOriginalData(){
+    userData.copyWith(originalUserData);
   }
 
   // Mifflin-St Jeor Equation
   int calculate() {
-    int bodyModifier = settings.gender == Gender.male? 5 : -161;
-    double calories = settings.activity.multiplier*(10 * settings.weight +
-        6.25 * settings.height - 5 * settings.age + bodyModifier);
+    int bodyModifier = userData.gender == Gender.male? 5 : -161;
+    double calories = userData.activity.multiplier*(10 * userData.weight +
+        6.25 * userData.height - 5 * userData.age + bodyModifier);
     return calories.toInt();
   }
 
   void saveSettings() async {
-    _preferences.setInt(_daysKey, settings.days);
-    _preferences.setInt(_caloriesKey, settings.calories);
-    _preferences.setInt(_budgetKey, settings.budget);
+    originalUserData.copyWith(userData);
+    _preferences.setInt(_daysKey, originalUserData.days);
+    _preferences.setInt(_caloriesKey, originalUserData.calories);
+    _preferences.setInt(_budgetKey, originalUserData.budget);
 
-    _preferences.setInt(_weightKey, settings.weight);
-    _preferences.setInt(_heightKey, settings.height);
-    _preferences.setInt(_ageKey, settings.age);
-    _preferences.setString(_genderKey, settings.gender.name.toLowerCase());
-    _preferences.setString(_activityLevelKey, settings.activity.name.toLowerCase());
+    _preferences.setInt(_weightKey, originalUserData.weight);
+    _preferences.setInt(_heightKey, originalUserData.height);
+    _preferences.setInt(_ageKey, originalUserData.age);
+    _preferences.setString(_genderKey, originalUserData.gender.name.toLowerCase());
+    _preferences.setString(_activityLevelKey, originalUserData.activity.name.toLowerCase());
 
-    _preferences.setBool(_isFirstLaunchKey, settings.isFirstLaunch);
+    _preferences.setBool(_isFirstLaunchKey, originalUserData.isFirstLaunch);
   }
 }
 
