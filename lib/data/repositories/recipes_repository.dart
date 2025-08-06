@@ -17,8 +17,8 @@ class RecipesRepository {
   RecipesRepository({required this.appBox});
 
   Future<List<List<Recipe>>> fetchMeals(
-      int daysNumber, int calories, int budget) async {
-    Response? response = await generateMenu(daysNumber, calories, budget);
+      int daysNumber, int calories, int budget, String previousResult) async {
+    Response? response = await generateMenu(daysNumber, calories, budget, previousResult);
     if (response == null) return [];
 
     // Parse the JSON response
@@ -47,7 +47,6 @@ class RecipesRepository {
           entity.imgUrl = imgUrl;
           dto.imgUrl = imgUrl;
         }
-        print(entity.imgUrl!=null);
         recipeEntities.add(entity);
         recipes.add(dto);
       }
