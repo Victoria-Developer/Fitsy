@@ -19,42 +19,41 @@ class _RecipesPageState extends ConsumerState<RecipesPage> {
     final notifier = ref.read(mealPlansProvider.notifier);
 
     return Scaffold(
-      body: Center(
-        child: mealPlansAsync.when(
-          loading: () => const CircularProgressIndicator(),
-          error: (e, st) =>
-              const Text("Error happened while generating recipes."),
-          data: (mealPlans) {
-            if (mealPlans.isEmpty) {
-              return const Text("You don't have any menu plans yet.");
-            }
+        body: Center(
+          child: mealPlansAsync.when(
+            loading: () => const CircularProgressIndicator(),
+            error: (e, st) =>
+                const Text("Error happened while generating recipes."),
+            data: (mealPlans) {
+              if (mealPlans.isEmpty) {
+                return const Text("You don't have any menu plans yet.");
+              }
 
-            return ListView.builder(
-              scrollDirection: Axis.horizontal,
-              physics: const PageScrollPhysics(),
-              itemCount: mealPlans.length,
-              itemBuilder: (_, index) {
-                return _buildMealPlanCard(mealPlans[index]);
-              },
-            );
-          },
+              return ListView.builder(
+                scrollDirection: Axis.horizontal,
+                physics: const PageScrollPhysics(),
+                itemCount: mealPlans.length,
+                itemBuilder: (_, index) {
+                  return _buildMealPlanCard(mealPlans[index]);
+                },
+              );
+            },
+          ),
         ),
-      ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.only(bottom: 10),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ElevatedButton(
-              onPressed: () {
-                notifier.clearAndFetch();
-              },
-              child: const Icon(Icons.refresh, size: 30),
-            ),
-          ],
-        ),
-      )
-    );
+        bottomNavigationBar: Padding(
+          padding: const EdgeInsets.only(bottom: 10),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ElevatedButton(
+                onPressed: () {
+                  notifier.clearAndFetch();
+                },
+                child: const Icon(Icons.refresh, size: 30),
+              ),
+            ],
+          ),
+        ));
   }
 
   SizedBox _buildMealPlanCard(List<Recipe> mealPlan) {
@@ -97,10 +96,13 @@ class _RecipesPageState extends ConsumerState<RecipesPage> {
                   SizedBox(height: 15),
                   Text(recipe.mealType ?? "Meal", style: titleStyle),
                   SizedBox(height: 10),
-                  Text(recipe.name ?? "Unnamed meal", style: titleStyle),
+                  Text(recipe.name ?? "Unnamed meal",
+                      style: titleStyle, textAlign: TextAlign.center),
                   SizedBox(height: 10),
-                  Text("Calories ${recipe.calories.toString()}. "
-                      "Price ${recipe.price.toString()} \$.", style: mealInfoStyle),
+                  Text(
+                      "Calories ${recipe.calories.toString()}. "
+                      "Price ${recipe.price.toString()} \$.",
+                      style: mealInfoStyle),
                   SizedBox(height: 10),
                   Text(recipe.instructions.toString(),
                       textAlign: TextAlign.center, softWrap: true),

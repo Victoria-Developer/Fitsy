@@ -3,7 +3,7 @@ enum Activity{
   light(1.375, "Light"),
   moderate(1.55, "Moderate"),
   active(1.725, "Active"),
-  extra(1.9, "Very active");
+  intense(1.9, "Intense");
 
   final double multiplier;
   final String name;
