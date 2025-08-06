@@ -1,6 +1,7 @@
 import 'package:fitsy/domain/enums/gender.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+
 import '../../data/repositories/settings_repository.dart';
 import '../../domain/enums/activity.dart';
 import '../../domain/models/settings.dart';

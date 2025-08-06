@@ -21,26 +21,40 @@ class SettingsRepository {
   Future<Settings> loadSettings() async {
     _preferences = await SharedPreferences.getInstance();
     Settings userData = Settings();
-    userData.days = _preferences.getInt(_daysKey) ?? 1;
-    userData.calories = _preferences.getInt(_caloriesKey) ?? 1775;
-    userData.budget = _preferences.getInt(_budgetKey) ?? 100;
 
-    userData.weight = _preferences.getInt(_weightKey) ?? 77;
-    userData.height = _preferences.getInt(_heightKey) ?? 180;
-    userData.age = _preferences.getInt(_ageKey) ?? 25;
-    userData.gender = Gender.values.byName(_preferences.getString(_genderKey) ?? "male");
-    userData.activity = Activity.values
-        .byName(_preferences.getString(_activityLevelKey) ?? "light");
+    changeVal(_preferences.getInt(_daysKey), (val) => userData.days = val);
+    changeVal(
+        _preferences.getInt(_caloriesKey), (val) => userData.calories = val);
+    changeVal(_preferences.getInt(_budgetKey), (val) => userData.budget = val);
+    changeVal(_preferences.getInt(_weightKey), (val) => userData.weight = val);
+    changeVal(_preferences.getInt(_heightKey), (val) => userData.height = val);
+    changeVal(_preferences.getInt(_ageKey), (val) => userData.age = val);
+    changeVal<String>(
+      _preferences.getString(_genderKey),
+      (val) => userData.gender = Gender.values.byName(val),
+    );
+    changeVal<String>(
+      _preferences.getString(_activityLevelKey),
+      (val) => userData.activity = Activity.values.byName(val),
+    );
+    changeVal(_preferences.getBool(_isFirstLaunchKey),
+        (val) => userData.isFirstLaunch = val);
 
-    userData.isFirstLaunch = _preferences.getBool(_isFirstLaunchKey) ?? true;
     return userData;
+  }
+
+  void changeVal<T>(T? value, void Function(T val) onChange) {
+    if (value != null) onChange(value);
   }
 
   // Mifflin-St Jeor Equation
   int calculate(Settings userData) {
-    int bodyModifier = userData.gender == Gender.male? 5 : -161;
-    double calories = userData.activity.multiplier*(10 * userData.weight +
-        6.25 * userData.height - 5 * userData.age + bodyModifier);
+    int bodyModifier = userData.gender == Gender.male ? 5 : -161;
+    double calories = userData.activity.multiplier *
+        (10 * userData.weight +
+            6.25 * userData.height -
+            5 * userData.age +
+            bodyModifier);
     return calories.toInt();
   }
 
@@ -53,7 +67,8 @@ class SettingsRepository {
     _preferences.setInt(_heightKey, userData.height);
     _preferences.setInt(_ageKey, userData.age);
     _preferences.setString(_genderKey, userData.gender.name.toLowerCase());
-    _preferences.setString(_activityLevelKey, userData.activity.name.toLowerCase());
+    _preferences.setString(
+        _activityLevelKey, userData.activity.name.toLowerCase());
 
     _preferences.setBool(_isFirstLaunchKey, userData.isFirstLaunch);
   }
