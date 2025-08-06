@@ -1,4 +1,3 @@
-
 AI powered meal planning app for mobile devices.
 Choose options like weight, height, budget per day and days amount on the Options screen.
 Meal plans are available on the Home Screen, user can check menu for every day by swapping cards horizontally. 
