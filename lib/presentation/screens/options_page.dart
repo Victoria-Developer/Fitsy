@@ -1,17 +1,17 @@
 import 'package:fitsy/domain/models/settings.dart';
+import 'package:fitsy/presentation/screens/settings_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../data/repositories/settings_repository.dart';
 import '../../domain/enums/activity.dart';
 import '../../domain/enums/gender.dart';
 import '../widgets/outlined_text_field.dart';
 
 class OptionsPage extends ConsumerStatefulWidget {
-  const OptionsPage({super.key, required this.onNavigateToRecipesPage});
+  const OptionsPage({super.key, this.onNavigateToRecipesPage});
 
-  final void Function() onNavigateToRecipesPage;
+  final void Function()? onNavigateToRecipesPage;
 
   @override
   ConsumerState<OptionsPage> createState() => _OptionsPageState();
@@ -19,36 +19,33 @@ class OptionsPage extends ConsumerStatefulWidget {
 
 class _OptionsPageState extends ConsumerState<OptionsPage> {
   final daysList = List.generate(7, (index) => index + 1);
-  late SettingsRepository settingsRepository;
-  late Settings userData;
-
-  bool isLoading = true;
 
   @override
-  initState() {
+  void initState() {
     super.initState();
-    _initSettings();
-  }
-
-  _initSettings() async {
-    settingsRepository = await ref.read(settingsRepositoryProvider.future);
-    setState(() {
-      settingsRepository.copyOriginalData();
-      userData = settingsRepository.userData;
-      isLoading = false;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Reset settings to original each time user opens the page
+      ref.read(settingsProvider.notifier).reset();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
+    final settingsAsync = ref.watch(settingsProvider);
+    final notifier = ref.read(settingsProvider.notifier);
 
+    return settingsAsync.when(
+      loading: () => const CircularProgressIndicator(),
+      error: (e, st) => const Text("Error happened while loading settings."),
+      data: (userData) => _buildMainContent(userData, notifier),
+    );
+  }
+
+  Widget _buildMainContent(Settings userData, SettingsNotifier notifier) {
     return Scaffold(
-      body: Center(
-        child: SingleChildScrollView(
-          child: Column(
+        body: Center(
+          child: SingleChildScrollView(
+              child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               _padded(
@@ -57,7 +54,7 @@ class _OptionsPageState extends ConsumerState<OptionsPage> {
                   _buildDropDownList(
                     userData.days,
                     daysList,
-                    (value) => userData.days = value,
+                    (value) => notifier.setDays(value),
                     (value) => value.toString(),
                   ),
                   const Text('days'),
@@ -69,7 +66,7 @@ class _OptionsPageState extends ConsumerState<OptionsPage> {
                   _buildDropDownList(
                     userData.gender,
                     Gender.values,
-                    (value) => userData.gender = value,
+                    (value) => notifier.setGender(value),
                     (value) => value.name,
                   ),
                 ]),
@@ -80,50 +77,39 @@ class _OptionsPageState extends ConsumerState<OptionsPage> {
                   _buildDropDownList(
                     userData.activity,
                     Activity.values,
-                    (value) => userData.activity = value,
+                    (value) => notifier.setActivity(value),
                     (value) => value.name,
                   ),
                 ]),
               ),
               _padded(
-                _buildNumericTextField('Age:', userData.age, '25', (value) {
-                  userData.age = value;
-                }),
-              ),
-              _padded(
-                _buildNumericTextField('Weight (kg):', userData.weight, '77',
-                    (value) {
-                  userData.weight = value;
-                }),
-              ),
-              _padded(
-                _buildNumericTextField('Height (cm):', userData.height, '180',
-                    (value) {
-                  userData.height = value;
-                }),
-              ),
-              _padded(
                 _buildNumericTextField(
-                    'Budget per day (usd):', userData.budget, '500', (value) {
-                  userData.budget = value;
-                }),
+                    'Age:', userData.age, (value) => notifier.setAge(value)),
+              ),
+              _padded(
+                _buildNumericTextField('Weight (kg):', userData.weight,
+                    (value) => notifier.setWeight(value)),
+              ),
+              _padded(
+                _buildNumericTextField('Height (cm):', userData.height,
+                    (value) => notifier.setHeight(value)),
+              ),
+              _padded(
+                _buildNumericTextField('Budget per day (usd):', userData.budget,
+                    (value) => notifier.setBudget(value)),
               )
             ],
-          ),
+          )),
         ),
-      ),
-      bottomNavigationBar: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            "${userData.calories} kcal recommended per day",
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 15),
-          _buildSubmitButton(),
-        ],
-      ),
-    );
+        bottomNavigationBar: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(bottom: 40.0), // adjust as needed
+              child: _buildSubmitButton(userData.isFirstLaunch, notifier),
+            ),
+          ],
+        ));
   }
 
   Widget _padded(Widget child) => Padding(
@@ -137,8 +123,8 @@ class _OptionsPageState extends ConsumerState<OptionsPage> {
       spacing: 20, // <-- Spacing between children
       children: children);
 
-  Widget _buildNumericTextField(String label, int initialValue, String hintText,
-      ValueChanged<int> onChanged) {
+  Widget _buildNumericTextField(
+      String label, int initialValue, ValueChanged<int> onChanged) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -150,16 +136,9 @@ class _OptionsPageState extends ConsumerState<OptionsPage> {
         SizedBox(
           width: 80,
           child: OutlinedTextField(
-            initialValue: initialValue.toString(),
-            hintText: hintText,
-            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            onEdit: (value) {
-              setState(() {
-                onChanged(int.parse(value));
-                userData.calories = settingsRepository.calculate();
-              });
-            },
-          ),
+              initialValue: initialValue.toString(),
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              onEdit: (value) => onChanged(int.parse(value))),
         ),
       ],
     );
@@ -185,10 +164,7 @@ class _OptionsPageState extends ConsumerState<OptionsPage> {
           }).toList(),
           onChanged: (T? value) {
             if (value != null) {
-              setState(() {
-                onChanged(value);
-                userData.calories = settingsRepository.calculate();
-              });
+              onChanged(value);
             }
           },
           dropdownColor: Colors.white,
@@ -197,17 +173,16 @@ class _OptionsPageState extends ConsumerState<OptionsPage> {
         ));
   }
 
-  Widget _buildSubmitButton() {
+  Widget _buildSubmitButton(bool isFirstLaunch, SettingsNotifier notifier) {
     return ElevatedButton(
       onPressed: () {
-        if (userData.isFirstLaunch) {
-          userData.isFirstLaunch = false;
-          // Send data to recipes screen
-          widget.onNavigateToRecipesPage();
+        if (isFirstLaunch) {
+          notifier.setFirstLaunch(false);
+          widget.onNavigateToRecipesPage?.call();
         }
-        settingsRepository.saveSettings();
+        notifier.saveSettings();
       },
-      child: const Text('Save'),
+      child: Text(isFirstLaunch ? "Next" : "Save"),
     );
   }
 }

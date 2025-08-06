@@ -1,13 +1,9 @@
-import 'dart:async';
-
-import 'package:fitsy/data/repositories/recipes_repository.dart';
-import 'package:fitsy/data/repositories/settings_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../domain/models/recipe.dart';
-import '../../domain/models/settings.dart';
+import 'meal_pans_notifier.dart';
 
 class RecipesPage extends ConsumerStatefulWidget {
   const RecipesPage({super.key});
@@ -17,82 +13,44 @@ class RecipesPage extends ConsumerStatefulWidget {
 }
 
 class _RecipesPageState extends ConsumerState<RecipesPage> {
-  final StreamController<List<List<Recipe>>> recipesController =
-      StreamController();
-  late final Stream<List<List<Recipe>>> _stream = recipesController.stream;
-  late RecipesRepository recipesRepository;
-  late Settings userData;
-
-  @override
-  void initState() {
-    _initRecipes();
-    super.initState();
-  }
-
-  _initRecipes() async {
-    recipesRepository = await ref.read(mealPlansRepositoryProvider.future);
-    SettingsRepository settingsRepository = await ref.read(
-        settingsRepositoryProvider.future
-    );
-    userData = settingsRepository.userData;
-
-    final dbPlans = await recipesRepository.getDatabaseMealPlans();
-    if (dbPlans.isEmpty) {
-      _fetchRecipes();
-    } else {
-      recipesController.add(dbPlans);
-    }
-  }
-
-  _fetchRecipes() async {
-    List<List<Recipe>>? mealPlans = await recipesRepository.fetchMeals(
-        userData.days, userData.calories, userData.budget);
-    recipesController.sink.add(mealPlans);
-  }
 
   @override
   Widget build(BuildContext context) {
-    print("REBUILD RECIPES");
+    final mealPlansAsync = ref.watch(mealPlansProvider);
+    final notifier = ref.read(mealPlansProvider.notifier);
+
     return Scaffold(
       body: Center(
-          child: StreamBuilder<List<List<Recipe>>>(
-        stream: _stream,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const CircularProgressIndicator();
-          } else if (snapshot.hasData) {
-            if (snapshot.data!.isEmpty) {
-              return const CircularProgressIndicator();
-            } else {
-              return ListView.builder(
-                scrollDirection: Axis.horizontal,
-                physics: const PageScrollPhysics(), // Snapping effect
-                itemCount: snapshot.data!.length,
-                itemBuilder: (_, index) {
-                  var data = snapshot.data![index];
-                  return _buildMealPlanCard(data);
-                },
-              );
+        child: mealPlansAsync.when(
+          loading: () => const CircularProgressIndicator(),
+          error: (e, st) => const Text("Error happened while generating recipes."),
+          data: (mealPlans) {
+            if (mealPlans.isEmpty) {
+              return const Text("You don't have any menu plans yet.");
             }
-          } else {
-            return const Text(
-                "Error happened while generating recipes. Please try again.");
-          }
-        },
-      )),
-      bottomNavigationBar: Row(
-          mainAxisAlignment: MainAxisAlignment.center, // or start/end if you prefer
-          children: [
-              ElevatedButton(
-                onPressed: () {
-                  recipesController.sink.add([]);
-                  _fetchRecipes();
-                },
-                child: const Icon(Icons.refresh, size: 30),
-              ),
 
-          ],
-        )
+            return ListView.builder(
+              scrollDirection: Axis.horizontal,
+              physics: const PageScrollPhysics(),
+              itemCount: mealPlans.length,
+              itemBuilder: (_, index) {
+                return _buildMealPlanCard(mealPlans[index]);
+              },
+            );
+          },
+        ),
+      ),
+      bottomNavigationBar: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          ElevatedButton(
+            onPressed: () {
+              notifier.clearAndFetch();
+            },
+            child: const Icon(Icons.refresh, size: 30),
+          ),
+        ],
+      ),
     );
   }
 

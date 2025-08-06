@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import '../navigation/route.dart';
 
 class DynamicBottomBar extends StatelessWidget {
-  const DynamicBottomBar({super.key, required this.navigationShell});
+  const DynamicBottomBar({
+    super.key,
+      required this.routes,
+      required this.isSelected,
+      required this.onNavigation
+  });
 
-  final StatefulNavigationShell navigationShell;
+  final List<NavRoute> routes;
+  final bool Function(NavRoute route) isSelected;
+  final void Function(BuildContext context, NavRoute route) onNavigation;
 
   @override
   Widget build(BuildContext context) {
@@ -18,26 +25,20 @@ class DynamicBottomBar extends StatelessWidget {
           mainAxisSize: MainAxisSize.max,
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Widget>[
-            _buildIconButton(const Icon(Icons.home), 0),
-            _buildIconButton(const Icon(Icons.settings), 1),
+            for (int i = 0; i < routes.length; i++)
+              _buildIconButton(context, routes[i]),
           ],
         ),
       ),
     );
   }
 
-  IconButton _buildIconButton(Icon icon, int index) {
+  IconButton _buildIconButton(context, NavRoute route) {
+    Widget icon = route.icon ?? const Icon(Icons.insert_comment_sharp);
     return IconButton(
-      icon: icon,
-      iconSize: 30.0,
-      isSelected: navigationShell.currentIndex == index,
-      onPressed: () {
-        navigationShell.goBranch(
-          index,
-          initialLocation:
-          index == navigationShell.currentIndex,
-        );
-      }
-    );
+        icon: icon,
+        iconSize: 30.0,
+        isSelected: isSelected(route),
+        onPressed: () => onNavigation(context, route));
   }
 }

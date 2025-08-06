@@ -1,22 +1,13 @@
-import 'package:fitsy/data/repositories/recipes_repository.dart';
 import 'package:fitsy/presentation/navigation/app_navigator.dart';
 import 'package:fitsy/presentation/themes/material_theme.dart';
 import 'package:fitsy/presentation/themes/util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import 'data/repositories/settings_repository.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(const ProviderScope(child: App()));
-}
-
-@Riverpod(keepAlive: true)
-Future<void> appStartupProvider(Ref ref) async {
-  await ref.watch(settingsRepositoryProvider.future);
-  await ref.watch(mealPlansRepositoryProvider.future);
 }
 
 class App extends ConsumerWidget {

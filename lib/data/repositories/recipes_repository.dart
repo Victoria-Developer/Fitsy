@@ -2,7 +2,6 @@ import 'package:http/http.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'dart:convert';
-import 'dart:developer';
 
 import '../../domain/converters/converter.dart';
 import '../../domain/models/recipe.dart';
@@ -25,7 +24,6 @@ class RecipesRepository {
     final jsonData = jsonDecode(response.body);
 
     final text = jsonData['candidates']?[0]['content']?['parts']?[0]['text'];
-    log(text);
     if (text == null) return [];
 
     final parsedData = jsonDecode(text) as Map<String, dynamic>;
@@ -64,8 +62,8 @@ List<List<Recipe>> groupRecipesByDayId(List<Recipe> recipes) {
   return groupedRecipes.values.toList();
 }
 
-// MealPlansRepository prover used by rest of the app.
-final mealPlansRepositoryProvider =
+// RecipesRepository provider used by rest of the app.
+final recipesRepositoryProvider =
     FutureProvider<RecipesRepository>((ref) async {
   final appBox = await AppBox.create();
   return RecipesRepository(appBox: appBox);

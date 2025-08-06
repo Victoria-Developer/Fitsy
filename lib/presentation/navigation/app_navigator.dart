@@ -1,24 +1,25 @@
-import 'package:fitsy/data/repositories/settings_repository.dart';
 import 'package:fitsy/presentation/navigation/route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../screens/redirection_page.dart';
+import '../screens/splash_screen.dart';
 import '../screens/options_page.dart';
 import '../screens/recipes_page.dart';
+import '../widgets/dynamic_bottom_bar.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
 final redirectionRoute = NavRoute(path: "/redirection", name: "redirection");
 final onboardingRoute = NavRoute(path: "/onboarding", name: "onboarding");
-final recipesRoute = NavRoute(path: "/recipes", name: "recipes");
-final optionsRoute = NavRoute(path: "/options", name: "options");
+final recipesRoute =
+    NavRoute(path: "/recipes", name: "recipes", icon: const Icon(Icons.home));
+final optionsRoute = NavRoute(
+    path: "/options", name: "options", icon: const Icon(Icons.settings));
 
-int currentNavIndex = 0;
+NavRoute? _currentNavRoute;
 
 final routerProvider = Provider<GoRouter>((ref) {
-  final settings = ref.watch(settingsRepositoryProvider);
   return GoRouter(
     navigatorKey: _rootNavigatorKey,
     initialLocation: redirectionRoute.path,
@@ -27,26 +28,27 @@ final routerProvider = Provider<GoRouter>((ref) {
           name: redirectionRoute.name,
           path: redirectionRoute.path,
           builder: (context, state) {
-            return RedirectionPage();
-          },
-          redirect: (context, state) {
-            if (settings is AsyncLoading || settings is AsyncError) {
-              return null;
-            }
-            final settingsValue = settings.value!;
-            if (settingsValue.userData.isFirstLaunch == true) {
-              currentNavIndex = 1;
-              return optionsRoute.path;
-            } else {
-              currentNavIndex = 0;
-              return recipesRoute.path;
-            }
+            return SplashScreen(
+                onNavigateToOnboarding: () =>
+                    onNavigation(context, onboardingRoute),
+                onNavigateToRecipes: () => onNavigation(context, recipesRoute));
+          }),
+      GoRoute(
+          name: onboardingRoute.name,
+          path: onboardingRoute.path,
+          pageBuilder: (context, state) {
+            return _transition(OptionsPage(
+                onNavigateToRecipesPage: () =>
+                    onNavigation(context, recipesRoute)));
           }),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
           return Scaffold(
             body: SafeArea(child: navigationShell),
-            bottomNavigationBar: _buildNavBar(context),
+            bottomNavigationBar: DynamicBottomBar(
+                routes: [recipesRoute, optionsRoute],
+                isSelected: (route) => isSelected(route),
+                onNavigation: (context, route) => onNavigation(context, route)),
           );
         },
         branches: [
@@ -60,10 +62,7 @@ final routerProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 name: optionsRoute.name,
                 path: optionsRoute.path,
-                pageBuilder: (context, state) => _transition(OptionsPage(
-                  onNavigateToRecipesPage: () =>
-                      context.goNamed(recipesRoute.name),
-                )),
+                pageBuilder: (context, state) => _transition(OptionsPage()),
               )
             ],
           ),
@@ -73,47 +72,23 @@ final routerProvider = Provider<GoRouter>((ref) {
   );
 });
 
-CustomTransitionPage _transition(Widget child){
+CustomTransitionPage _transition(Widget child) {
   return CustomTransitionPage(
     child: child,
     transitionsBuilder: (context, animation, secondaryAnimation, child) {
       return FadeTransition(
-        opacity:
-        CurveTween(curve: Curves.easeInOutCirc).animate(animation),
+        opacity: CurveTween(curve: Curves.easeInOutCirc).animate(animation),
         child: child,
       );
     },
   );
 }
 
-Widget _buildNavBar(BuildContext context) {
-  return BottomAppBar(
-    shape: const CircularNotchedRectangle(),
-    notchMargin: 5.0,
-    clipBehavior: Clip.antiAlias,
-    child: SizedBox(
-      height: kBottomNavigationBarHeight,
-      child: Row(
-        mainAxisSize: MainAxisSize.max,
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: <Widget>[
-          _buildIconButton(const Icon(Icons.home), 0,
-              () => context.replaceNamed(recipesRoute.name)),
-          _buildIconButton(const Icon(Icons.settings), 1,
-              () => context.replaceNamed(optionsRoute.name)),
-        ],
-      ),
-    ),
-  );
+onNavigation(BuildContext context, NavRoute route) {
+  _currentNavRoute = route;
+  context.replaceNamed(route.name);
 }
 
-IconButton _buildIconButton(Icon icon, int index, onNavigation) {
-  return IconButton(
-      icon: icon,
-      iconSize: 30.0,
-      isSelected: currentNavIndex == index,
-      onPressed: () {
-        currentNavIndex = index;
-        onNavigation();
-      });
+isSelected(NavRoute route) {
+  return _currentNavRoute == route;
 }
