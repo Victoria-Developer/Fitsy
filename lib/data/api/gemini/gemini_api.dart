@@ -9,7 +9,7 @@ import 'gemini_model.dart';
 Future<Response?> sendRequest(String requestBody) async {
   var url = "https://generativelanguage.googleapis.com/v1beta/models/"
       "${GeminiModel.flashLatestStable.name}:generateContent?key=$geminiApiKey";
-  var response = await sendHttpRequest(url, requestBody);
+  var response = await postHttpRequest(url, requestBody);
   if (response != null) {
     return response;
   } else {
@@ -60,6 +60,7 @@ String _buildMenuPrompt(int daysNumber, int calories, int budget) {
     Describe recipes in detail with all ingredients measurements.
     Do not repeat recipe names, and ensure that each recipe is distinct from others.
     Don't mention meal name like 'Breakfast' in 'recipe_name'.
+    Be concise in recipe names and use popular ones.
         {
             "recipes":[
                 { 

@@ -17,7 +17,7 @@ class App extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
 
-    final textTheme = createTextTheme(context, "Lato", "Lato");
+    final textTheme = createTextTheme(context, "EB Garamond", "EB Garamond");
     final theme = MaterialTheme(textTheme);
 
     return MaterialApp.router(

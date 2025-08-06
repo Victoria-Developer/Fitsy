@@ -14,6 +14,6 @@ TextTheme createTextTheme(
     labelLarge: bodyTextTheme.labelLarge,
     labelMedium: bodyTextTheme.labelMedium,
     labelSmall: bodyTextTheme.labelSmall,
-  ).apply(fontSizeFactor: 1.2);
+  ).apply(fontSizeFactor: 1.4);
   return textTheme;
 }

@@ -3,6 +3,7 @@ import 'package:fitsy/presentation/screens/settings_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../domain/enums/activity.dart';
 import '../../domain/enums/gender.dart';
@@ -43,7 +44,8 @@ class _OptionsPageState extends ConsumerState<OptionsPage> {
 
   Widget _buildMainContent(Settings userData, SettingsNotifier notifier) {
     return Scaffold(
-        body: Center(
+        body: Card(
+            child: Center(
           child: SingleChildScrollView(
               child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -100,12 +102,13 @@ class _OptionsPageState extends ConsumerState<OptionsPage> {
               )
             ],
           )),
-        ),
+        )),
         bottomNavigationBar: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Padding(
-              padding: const EdgeInsets.only(bottom: 40.0), // adjust as needed
+              padding: const EdgeInsets.only(top: 10.0, bottom: 20.0),
+              // adjust as needed
               child: _buildSubmitButton(userData.isFirstLaunch, notifier),
             ),
           ],
@@ -182,7 +185,8 @@ class _OptionsPageState extends ConsumerState<OptionsPage> {
         }
         notifier.saveSettings();
       },
-      child: Text(isFirstLaunch ? "Next" : "Save"),
+      child: Text(isFirstLaunch ? "Next" : "Save",
+          style: GoogleFonts.ebGaramond(fontWeight: FontWeight.bold)),
     );
   }
 }

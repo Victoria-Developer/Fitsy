@@ -1,3 +1,4 @@
+import 'package:fitsy/data/api/pixabay_api.dart';
 import 'package:http/http.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -31,14 +32,26 @@ class RecipesRepository {
     List<RecipeEntity> recipeEntities = [];
     List<Recipe> recipes = [];
 
-    parsedData.forEach((dayId, recipeList) {
+    for (var entry in parsedData.entries) {
+      var recipeList = entry.value;
+
       for (var recipeJson in (recipeList as List)) {
         var entity = fromJsonToDbEntity(recipeJson);
         var dto = fromJsonToDTO(recipeJson);
+
+        // for each find Pixabay image
+        Response? imgResponse = await getImage(dto.name ?? "Food");
+        if (imgResponse != null) {
+          var jsonImgData = jsonDecode(imgResponse.body);
+          var imgUrl = jsonImgData['hits']?[0]['webformatURL'];
+          entity.imgUrl = imgUrl;
+          dto.imgUrl = imgUrl;
+        }
+        print(entity.imgUrl!=null);
         recipeEntities.add(entity);
         recipes.add(dto);
       }
-    });
+    }
 
     appBox.replaceAllMealPlans(recipeEntities);
 

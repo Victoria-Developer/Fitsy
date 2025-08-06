@@ -13,7 +13,6 @@ class RecipesPage extends ConsumerStatefulWidget {
 }
 
 class _RecipesPageState extends ConsumerState<RecipesPage> {
-
   @override
   Widget build(BuildContext context) {
     final mealPlansAsync = ref.watch(mealPlansProvider);
@@ -23,7 +22,8 @@ class _RecipesPageState extends ConsumerState<RecipesPage> {
       body: Center(
         child: mealPlansAsync.when(
           loading: () => const CircularProgressIndicator(),
-          error: (e, st) => const Text("Error happened while generating recipes."),
+          error: (e, st) =>
+              const Text("Error happened while generating recipes."),
           data: (mealPlans) {
             if (mealPlans.isEmpty) {
               return const Text("You don't have any menu plans yet.");
@@ -40,55 +40,75 @@ class _RecipesPageState extends ConsumerState<RecipesPage> {
           },
         ),
       ),
-      bottomNavigationBar: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          ElevatedButton(
-            onPressed: () {
-              notifier.clearAndFetch();
-            },
-            child: const Icon(Icons.refresh, size: 30),
-          ),
-        ],
-      ),
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.only(bottom: 10),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ElevatedButton(
+              onPressed: () {
+                notifier.clearAndFetch();
+              },
+              child: const Icon(Icons.refresh, size: 30),
+            ),
+          ],
+        ),
+      )
     );
   }
 
   SizedBox _buildMealPlanCard(List<Recipe> mealPlan) {
+    final placeholderImg = "https://foodservice-rewards.com/cdn/shop/"
+        "t/262/assets/fsr-placeholder.png?v=45093109498714503231652397781";
+
+    final dayStyle = GoogleFonts.ebGaramond(
+      fontSize: 25,
+      fontWeight: FontWeight.bold,
+    );
+
+    final titleStyle = GoogleFonts.ebGaramond(
+      fontWeight: FontWeight.bold,
+    );
+
+    final mealInfoStyle = GoogleFonts.ebGaramond(
+      fontStyle: FontStyle.italic,
+    );
+
     return SizedBox(
         width: MediaQuery.of(context).size.width,
         child: Card(
             child: SingleChildScrollView(
           child: Column(
             children: [
-              SizedBox(height: 10),
-              Text("Day ${mealPlan.first.dayId}",
-                style: GoogleFonts.playfairDisplay(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              )),
+              SizedBox(height: 20),
+              Text("Day ${mealPlan.first.dayId}", style: dayStyle),
               SizedBox(height: 10),
               Column(
                   children: mealPlan.map((recipe) {
                 return Column(children: [
                   const Divider(height: 50, thickness: 1),
                   SizedBox(height: 10),
-                  Text("${recipe.name} (${recipe.mealType})",
-                      textAlign: TextAlign.center),
-                  SizedBox(height: 10),
-                  Text(
-                    recipe.instructions.toString(),
-                    textAlign: TextAlign.center,
-                    softWrap: true
+                  Image.network(
+                    recipe.imgUrl ?? placeholderImg,
+                    width: 200,
+                    height: 200,
+                    fit: BoxFit.cover,
                   ),
+                  SizedBox(height: 15),
+                  Text(recipe.mealType ?? "Meal", style: titleStyle),
                   SizedBox(height: 10),
-                  Text("Calories ${recipe.calories.toString()}."),
-                  Text("Price ${recipe.price.toString()} \$.")
+                  Text(recipe.name ?? "Unnamed meal", style: titleStyle),
+                  SizedBox(height: 10),
+                  Text("Calories ${recipe.calories.toString()}. "
+                      "Price ${recipe.price.toString()} \$.", style: mealInfoStyle),
+                  SizedBox(height: 10),
+                  Text(recipe.instructions.toString(),
+                      textAlign: TextAlign.center, softWrap: true),
+                  SizedBox(height: 10),
                 ]);
               }).toList())
             ],
           ),
-        ))
-    );
+        )));
   }
 }

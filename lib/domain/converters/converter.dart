@@ -8,7 +8,8 @@ Recipe fromEntityToDTO(RecipeEntity recipeEntity) {
       name: recipeEntity.name,
       instructions: recipeEntity.instructions,
       calories: recipeEntity.calories,
-      price: recipeEntity.price);
+      price: recipeEntity.price,
+      imgUrl: recipeEntity.imgUrl);
 }
 
 Recipe fromJsonToDTO(Map<String, dynamic> json) {

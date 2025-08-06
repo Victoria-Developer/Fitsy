@@ -4,51 +4,56 @@
   "_note3": "If you have VCS merge conflicts, you must resolve them according to ObjectBox docs.",
   "entities": [
     {
-      "id": "1:8823790866709140877",
-      "lastPropertyId": "7:6563587726487438878",
+      "id": "1:2807285075763831889",
+      "lastPropertyId": "8:3249460469234280111",
       "name": "RecipeEntity",
       "properties": [
         {
-          "id": "1:7385528326445958384",
+          "id": "1:625813606272239869",
           "name": "id",
           "type": 6,
           "flags": 1
         },
         {
-          "id": "2:6134963302973389607",
+          "id": "2:3469864373264303136",
           "name": "dayId",
           "type": 6
         },
         {
-          "id": "3:4540356496404038735",
+          "id": "3:765388374011875575",
           "name": "mealType",
           "type": 9
         },
         {
-          "id": "4:2458236138434365816",
+          "id": "4:928250572076780365",
           "name": "name",
           "type": 9
         },
         {
-          "id": "5:6586697536013838998",
+          "id": "5:4849562909317554814",
           "name": "instructions",
           "type": 9
         },
         {
-          "id": "6:8464907476627541996",
+          "id": "6:8291361463487687183",
           "name": "calories",
           "type": 6
         },
         {
-          "id": "7:6563587726487438878",
+          "id": "7:5965469368386073604",
           "name": "price",
           "type": 8
+        },
+        {
+          "id": "8:3249460469234280111",
+          "name": "imgUrl",
+          "type": 9
         }
       ],
       "relations": []
     }
   ],
-  "lastEntityId": "1:8823790866709140877",
+  "lastEntityId": "1:2807285075763831889",
   "lastIndexId": "0:0",
   "lastRelationId": "0:0",
   "lastSequenceId": "0:0",

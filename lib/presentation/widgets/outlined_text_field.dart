@@ -23,7 +23,10 @@ class OutlinedTextField extends StatelessWidget {
       },
       inputFormatters: inputFormatters,
       decoration: InputDecoration(
-        border: const OutlineInputBorder(),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(5),
+          borderSide: BorderSide(color: Colors.white), // or any color
+        ),
       ),
     );
   }

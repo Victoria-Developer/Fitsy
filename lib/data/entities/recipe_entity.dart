@@ -10,9 +10,14 @@ class RecipeEntity {
   String? instructions;
   int? calories;
   double? price;
+  String? imgUrl;
 
-  RecipeEntity({
-    this.dayId, this.mealType, this.name,
-    this.instructions, this.calories, this.price
-  });
+  RecipeEntity(
+      {this.dayId,
+      this.mealType,
+      this.name,
+      this.instructions,
+      this.calories,
+      this.price,
+      this.imgUrl});
 }
