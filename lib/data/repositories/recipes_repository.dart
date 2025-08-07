@@ -18,7 +18,8 @@ class RecipesRepository {
 
   Future<List<List<Recipe>>> fetchMeals(
       int daysNumber, int calories, int budget, String previousResult) async {
-    Response? response = await generateMenu(daysNumber, calories, budget, previousResult);
+    Response? response =
+        await generateMenu(daysNumber, calories, budget, previousResult);
     if (response == null) return [];
 
     // Parse the JSON response
@@ -34,27 +35,43 @@ class RecipesRepository {
 
     for (var entry in parsedData.entries) {
       var recipeList = entry.value;
-
       for (var recipeJson in (recipeList as List)) {
         var entity = fromJsonToDbEntity(recipeJson);
         var dto = fromJsonToDTO(recipeJson);
-
-        // for each find Pixabay image
-        Response? imgResponse = await getImage(dto.name ?? "Food");
-        if (imgResponse != null) {
-          var jsonImgData = jsonDecode(imgResponse.body);
-          var imgUrl = jsonImgData['hits']?[0]['webformatURL'];
-          entity.imgUrl = imgUrl;
-          dto.imgUrl = imgUrl;
-        }
         recipeEntities.add(entity);
         recipes.add(dto);
       }
     }
 
+    await _getPixabayImages(recipeEntities, recipes);
     appBox.replaceAllMealPlans(recipeEntities);
-
     return groupRecipesByDayId(recipes);
+  }
+
+  Future<void> _getPixabayImages(List<RecipeEntity> entities, List<Recipe> dtos) async {
+    List<Future<void>> imageFutures = [];
+
+    for (int i = 0; i < dtos.length; i++) {
+      final dto = dtos[i];
+      final entity = entities[i];
+
+      if (dto.name != null) {
+        imageFutures.add(_fetchAndAssignImage(dto, entity));
+      }
+    }
+
+    await Future.wait(
+        imageFutures); // Waits for all async image fetches to complete
+  }
+
+  Future<void> _fetchAndAssignImage(Recipe dto, RecipeEntity entity) async {
+    Response? imgResponse = await getImage(dto.name!);
+    if (imgResponse != null) {
+      var jsonImgData = jsonDecode(imgResponse.body);
+      var imgUrl = jsonImgData['hits']?[0]['webformatURL'];
+      entity.imgUrl = imgUrl;
+      dto.imgUrl = imgUrl;
+    }
   }
 
   Future<List<List<Recipe>>> getDatabaseMealPlans() async {

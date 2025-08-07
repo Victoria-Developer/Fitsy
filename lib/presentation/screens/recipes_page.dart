@@ -13,6 +13,24 @@ class RecipesPage extends ConsumerStatefulWidget {
 }
 
 class _RecipesPageState extends ConsumerState<RecipesPage> {
+  final AssetImage placeholderImage =
+      AssetImage('assets/images/recipe-icon-placeholder.png');
+  final AssetImage loadingImage =
+  AssetImage('assets/images/loading-icon.gif');
+
+  final dayStyle = GoogleFonts.ebGaramond(
+    fontSize: 25,
+    fontWeight: FontWeight.bold,
+  );
+
+  final titleStyle = GoogleFonts.ebGaramond(
+    fontWeight: FontWeight.bold,
+  );
+
+  final mealInfoStyle = GoogleFonts.ebGaramond(
+    fontStyle: FontStyle.italic,
+  );
+
   @override
   Widget build(BuildContext context) {
     final mealPlansAsync = ref.watch(mealPlansProvider);
@@ -57,22 +75,6 @@ class _RecipesPageState extends ConsumerState<RecipesPage> {
   }
 
   SizedBox _buildMealPlanCard(List<Recipe> mealPlan) {
-    final placeholderImg = "https://foodservice-rewards.com/cdn/shop/"
-        "t/262/assets/fsr-placeholder.png?v=45093109498714503231652397781";
-
-    final dayStyle = GoogleFonts.ebGaramond(
-      fontSize: 25,
-      fontWeight: FontWeight.bold,
-    );
-
-    final titleStyle = GoogleFonts.ebGaramond(
-      fontWeight: FontWeight.bold,
-    );
-
-    final mealInfoStyle = GoogleFonts.ebGaramond(
-      fontStyle: FontStyle.italic,
-    );
-
     return SizedBox(
         width: MediaQuery.of(context).size.width,
         child: Card(
@@ -87,12 +89,7 @@ class _RecipesPageState extends ConsumerState<RecipesPage> {
                 return Column(children: [
                   const Divider(height: 50, thickness: 1),
                   SizedBox(height: 10),
-                  Image.network(
-                    recipe.imgUrl ?? placeholderImg,
-                    width: 200,
-                    height: 200,
-                    fit: BoxFit.cover,
-                  ),
+                  getRecipeImage(recipe.imgUrl),
                   SizedBox(height: 15),
                   Text(recipe.mealType ?? "Meal", style: titleStyle),
                   SizedBox(height: 10),
@@ -112,5 +109,24 @@ class _RecipesPageState extends ConsumerState<RecipesPage> {
             ],
           ),
         )));
+  }
+
+  Widget getRecipeImage(String? imgUrl) {
+    return FadeInImage(
+      image: NetworkImage(imgUrl ?? ""),
+      placeholder: loadingImage,
+      imageErrorBuilder: (context, error, stackTrace) {
+        // fallback when the network image fails
+        return Image(
+          image: placeholderImage,
+          width: 200,
+          height: 200,
+          fit: BoxFit.cover
+        );
+      },
+      width: 200,
+      height: 200,
+      fit: BoxFit.cover,
+    );
   }
 }
