@@ -9,17 +9,18 @@ import '../../domain/enums/activity.dart';
 import '../../domain/enums/gender.dart';
 import '../widgets/outlined_text_field.dart';
 
-class OptionsPage extends ConsumerStatefulWidget {
-  const OptionsPage({super.key, this.onNavigateToRecipesPage});
+class SettingsPage extends ConsumerStatefulWidget {
+  const SettingsPage({super.key, this.onNavigateToRecipesPage});
 
   final void Function()? onNavigateToRecipesPage;
 
   @override
-  ConsumerState<OptionsPage> createState() => _OptionsPageState();
+  ConsumerState<SettingsPage> createState() => _OptionsPageState();
 }
 
-class _OptionsPageState extends ConsumerState<OptionsPage> {
+class _OptionsPageState extends ConsumerState<SettingsPage> {
   final daysList = List.generate(7, (index) => index + 1);
+  final submitButtonStyle = GoogleFonts.ebGaramond(fontWeight: FontWeight.bold);
 
   @override
   void initState() {
@@ -50,6 +51,18 @@ class _OptionsPageState extends ConsumerState<OptionsPage> {
               child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              _padded(_wrap([
+                const Text('Use AI for menu plans: '),
+                Switch(
+                  value: userData.useAI,
+                  activeColor: Colors.cyan,
+                  onChanged: (bool value) {
+                    setState(() {
+                      notifier.setUseAI(value);
+                    });
+                  },
+                )
+              ])),
               _padded(
                 _wrap([
                   const Text('Meal plan for: '),
@@ -185,8 +198,7 @@ class _OptionsPageState extends ConsumerState<OptionsPage> {
         }
         notifier.saveSettings();
       },
-      child: Text(isFirstLaunch ? "Next" : "Save",
-          style: GoogleFonts.ebGaramond(fontWeight: FontWeight.bold)),
+      child: Text(isFirstLaunch ? "Next" : "Save", style: submitButtonStyle),
     );
   }
 }

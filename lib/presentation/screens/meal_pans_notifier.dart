@@ -26,17 +26,11 @@ class MealPlansNotifier extends AsyncNotifier<List<List<Recipe>>> {
   }
 
   Future<List<List<Recipe>>> fetchNewMealPlans() async {
-    List<String> names = [];
-    state.value?.forEach((list) {
-      for (var recipe in list) {
-        names.add(recipe.name??"");
-      }
-    });
     final newPlans = await _repo.fetchMeals(
       _settings.days,
       _settings.calories,
       _settings.budget,
-      names.toString()
+      _settings.useAI
     );
 
     state = AsyncData(newPlans);

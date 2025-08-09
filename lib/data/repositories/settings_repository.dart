@@ -17,6 +17,7 @@ class SettingsRepository {
   final String _genderKey = "gender";
   final String _activityLevelKey = "activity";
   final String _isFirstLaunchKey = "is_first_launch";
+  final String _useAIKey = "use_AI";
 
   Future<Settings> loadSettings() async {
     _preferences = await SharedPreferences.getInstance();
@@ -39,6 +40,9 @@ class SettingsRepository {
     );
     changeVal(_preferences.getBool(_isFirstLaunchKey),
         (val) => userData.isFirstLaunch = val);
+
+    changeVal(_preferences.getBool(_useAIKey),
+            (val) => userData.useAI = val);
 
     return userData;
   }
@@ -71,6 +75,7 @@ class SettingsRepository {
         _activityLevelKey, userData.activity.name.toLowerCase());
 
     _preferences.setBool(_isFirstLaunchKey, userData.isFirstLaunch);
+    _preferences.setBool(_useAIKey, userData.useAI);
   }
 }
 

@@ -62,6 +62,11 @@ class SettingsNotifier extends AsyncNotifier<Settings> {
     state = AsyncData(userData);
   }
 
+  setUseAI(bool useAI){
+    userData.useAI = useAI;
+    state = AsyncData(userData);
+  }
+
   saveSettings() async {
     _originalUserData.copyWith(userData);
     _settingsRepo.saveSettings(userData);

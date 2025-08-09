@@ -17,10 +17,8 @@ Future<Response?> sendRequest(String requestBody) async {
   }
 }
 
-Future<Response?> generateMenu(
-    int daysNumber, int calories, int budget, previousResult) async {
-  String prompt =
-      _buildMenuPrompt(daysNumber, calories, budget, previousResult);
+Future<Response?> generateMenu(int daysNumber, int calories, int budget) async {
+  String prompt = _buildMenuPrompt(daysNumber, calories, budget);
   String request = _buildJsonRequestBody(prompt);
   return await sendRequest(request);
 }
@@ -47,8 +45,7 @@ String _buildJsonRequestBody(String prompt) {
   return jsonEncode(requestBody);
 }
 
-String _buildMenuPrompt(
-    int daysNumber, int calories, int budget, previousResult) {
+String _buildMenuPrompt(int daysNumber, int calories, int budget) {
   // add checks for unrealistic calories and budget like 0 calories and 0 usd.
   return """
     Calories amount per day should be no more than $calories. 
@@ -60,8 +57,7 @@ String _buildMenuPrompt(
     Describe recipes in detail with all ingredients measurements.
     Do not repeat recipe names, and ensure that each recipe is distinct from others.
     Don't mention meal name like 'Breakfast' in 'recipe_name'.
-    Be concise in recipe names and use popular ones.
-    Don't include recipes: $previousResult.
+    Be concise in recipe names.
         {
             "recipes":[
                 { 

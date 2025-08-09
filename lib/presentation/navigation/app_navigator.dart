@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../screens/splash_screen.dart';
-import '../screens/options_page.dart';
+import '../screens/settings_page.dart';
 import '../screens/recipes_page.dart';
 import '../widgets/dynamic_bottom_bar.dart';
 
@@ -37,7 +37,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           name: onboardingRoute.name,
           path: onboardingRoute.path,
           pageBuilder: (context, state) {
-            return _transition(OptionsPage(
+            return _transition(SettingsPage(
                 onNavigateToRecipesPage: () =>
                     onNavigation(context, recipesRoute)));
           }),
@@ -62,7 +62,7 @@ final routerProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 name: optionsRoute.name,
                 path: optionsRoute.path,
-                pageBuilder: (context, state) => _transition(OptionsPage()),
+                pageBuilder: (context, state) => _transition(SettingsPage()),
               )
             ],
           ),

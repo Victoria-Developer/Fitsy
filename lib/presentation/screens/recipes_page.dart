@@ -1,3 +1,4 @@
+import 'package:fitsy/presentation/widgets/visibility_component.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -15,8 +16,7 @@ class RecipesPage extends ConsumerStatefulWidget {
 class _RecipesPageState extends ConsumerState<RecipesPage> {
   final AssetImage placeholderImage =
       AssetImage('assets/images/recipe-icon-placeholder.png');
-  final AssetImage loadingImage =
-  AssetImage('assets/images/loading-icon.gif');
+  final AssetImage loadingImage = AssetImage('assets/images/loading-icon.gif');
 
   final dayStyle = GoogleFonts.ebGaramond(
     fontSize: 25,
@@ -44,7 +44,7 @@ class _RecipesPageState extends ConsumerState<RecipesPage> {
                 const Text("Error happened while generating recipes."),
             data: (mealPlans) {
               if (mealPlans.isEmpty) {
-                return const Text("You don't have any menu plans yet.");
+                return const Text("No menu plans found.");
               }
 
               return ListView.builder(
@@ -97,12 +97,12 @@ class _RecipesPageState extends ConsumerState<RecipesPage> {
                       style: titleStyle, textAlign: TextAlign.center),
                   SizedBox(height: 10),
                   Text(
-                      "Calories ${recipe.calories.toString()}. "
-                      "Price ${recipe.price.toString()} \$.",
+                      "Calories ${recipe.calories ?? "unknown"}. "
+                      "Price ${recipe.price ?? "unknown"} \$.",
                       style: mealInfoStyle),
-                  SizedBox(height: 10),
-                  Text(recipe.instructions.toString(),
-                      textAlign: TextAlign.center, softWrap: true),
+                  SizedBox(height: 20),
+                  if (recipe.instructions != null)
+                    VisibilityComponent(instructions: recipe.instructions!),
                   SizedBox(height: 10),
                 ]);
               }).toList())
@@ -118,11 +118,10 @@ class _RecipesPageState extends ConsumerState<RecipesPage> {
       imageErrorBuilder: (context, error, stackTrace) {
         // fallback when the network image fails
         return Image(
-          image: placeholderImage,
-          width: 200,
-          height: 200,
-          fit: BoxFit.cover
-        );
+            image: placeholderImage,
+            width: 200,
+            height: 200,
+            fit: BoxFit.cover);
       },
       width: 200,
       height: 200,

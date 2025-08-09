@@ -2,6 +2,7 @@ import '../enums/activity.dart';
 import '../enums/gender.dart';
 
 class Settings {
+  bool useAI;
   int days;
   int budget;
   int weight;
@@ -13,6 +14,7 @@ class Settings {
   Activity activity;
 
   Settings({
+    this.useAI = true,
     this.days = 1,
     this.budget = 100,
     this.weight = 55,
@@ -25,6 +27,7 @@ class Settings {
   });
 
   copyWith(Settings settings) {
+    useAI = settings.useAI;
     days = settings.days;
     budget = settings.budget;
     weight = settings.weight;

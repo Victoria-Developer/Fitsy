@@ -84,7 +84,7 @@ class MaterialTheme {
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-        elevation: 4,
+        elevation: 3,
         minimumSize: Size(60, 50),
         backgroundColor: colorScheme.primaryContainer,
         // force button bg color
