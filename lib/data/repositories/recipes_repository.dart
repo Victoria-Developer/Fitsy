@@ -47,8 +47,8 @@ class RecipesRepository {
         .lte('price', pricePerServing.toInt())
         .lte('calories', caloriesPerServing.toInt());
 
-    Future<List<Recipe>> fetchAndFill(String type) async {
-      final data = await baseQuery.ilike('type', '%$type%');
+    Future<List<Recipe>> fetchAndFill(String tag, String type) async {
+      final data = await baseQuery.eq(tag, true);
       data.shuffle();
       final selected = data.take(daysNumber).toList();
 
@@ -68,9 +68,9 @@ class RecipesRepository {
           .toList();
     }
 
-    final breakfasts = await fetchAndFill('Breakfast');
-    final lunches = await fetchAndFill('Lunch');
-    final dinners = await fetchAndFill('Dinner');
+    final breakfasts = await fetchAndFill('breakfast', 'Breakfast');
+    final lunches = await fetchAndFill('main course', 'Lunch');
+    final dinners = await fetchAndFill('main course', 'Dinner');
 
     return [...breakfasts, ...lunches, ...dinners];
   }
