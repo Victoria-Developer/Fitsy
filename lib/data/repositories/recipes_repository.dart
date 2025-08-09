@@ -48,24 +48,28 @@ class RecipesRepository {
         .lte('calories', caloriesPerServing.toInt());
 
     Future<List<Recipe>> fetchAndFill(String tag, String type) async {
-      final data = await baseQuery.eq(tag, true);
-      data.shuffle();
-      final selected = data.take(daysNumber).toList();
+      try {
+        final data = await baseQuery.eq(tag, true);
+        data.shuffle();
+        final selected = data.take(daysNumber).toList();
 
-      final filled = List.generate(
-        daysNumber,
-        (i) => selected[i % selected.length],
-      );
+        final filled = List.generate(
+          daysNumber,
+          (i) => selected[i % selected.length],
+        );
 
-      return filled
-          .asMap()
-          .entries
-          .map((entry) => fromSupabaseJsonToDTO(
-                entry.value,
-                type,
-                entry.key + 1,
-              ))
-          .toList();
+        return filled
+            .asMap()
+            .entries
+            .map((entry) => fromSupabaseJsonToDTO(
+                  entry.value,
+                  type,
+                  entry.key + 1,
+                ))
+            .toList();
+      } catch (e) {
+        return [];
+      }
     }
 
     final breakfasts = await fetchAndFill('breakfast', 'Breakfast');
