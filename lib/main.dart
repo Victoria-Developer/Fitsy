@@ -1,15 +1,11 @@
-import 'package:fitsy/auth/secrets.dart';
 import 'package:fitsy/presentation/navigation/app_navigator.dart';
 import 'package:fitsy/presentation/themes/material_theme.dart';
 import 'package:fitsy/presentation/themes/util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Supabase.initialize(url: supabaseURL,anonKey: supabaseAnonKey);
   runApp(const ProviderScope(child: App()));
 }
 

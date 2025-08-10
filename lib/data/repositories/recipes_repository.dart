@@ -1,7 +1,7 @@
 import 'package:fitsy/data/api/pixabay_api.dart';
+import 'package:fitsy/data/api/supabase.dart';
 import 'package:http/http.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'dart:convert';
 
@@ -14,7 +14,6 @@ import '../entities/recipe_entity.dart';
 @Riverpod(keepAlive: true)
 class RecipesRepository {
   late AppBox appBox;
-  final SupabaseClient supabase = Supabase.instance.client;
 
   RecipesRepository({required this.appBox});
 
@@ -41,15 +40,12 @@ class RecipesRepository {
     final pricePerServing = budget ~/ 3;
     final caloriesPerServing = calories ~/ 3;
 
-    final baseQuery = supabase
-        .from("recipes")
-        .select()
-        .lte('price', pricePerServing.toInt())
-        .lte('calories', caloriesPerServing.toInt());
-
     Future<List<Recipe>> fetchAndFill(String tag, String type) async {
       try {
-        final data = await baseQuery.eq(tag, true);
+        final response =
+            await fetchRecipes(pricePerServing, caloriesPerServing, tag);
+        if (response == null) return [];
+        final List data = jsonDecode(response.body);
         data.shuffle();
         final selected = data.take(daysNumber).toList();
 
