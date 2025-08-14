@@ -1,4 +1,4 @@
-  **Fitsy** is an AI-powered meal planning app for mobile devices. You can switch between AI generation and Fitsy's meal database.
+ **Fitsy** is an AI-powered meal planning app for mobile devices. You can switch between AI generation and Fitsy's meal database.
 
 - Adjust your preferences on the **Options** screen.
 - Meal plans are displayed on the **Home Screen** — swipe horizontally to explore daily menus.
@@ -11,4 +11,5 @@
 
 ---
 
-https://github.com/user-attachments/assets/a063e98e-7356-4cb9-9e47-a48de99af1d4
+
+https://github.com/user-attachments/assets/614c785d-8c2e-40c7-ae48-38517fd10e5a
