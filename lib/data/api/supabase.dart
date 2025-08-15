@@ -1,9 +1,8 @@
-import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:http/http.dart';
 import '../../auth/secrets.dart';
 
-Future<Response?> fetchRecipes(
+Future<Response?> fetchFitsyRecipes(
     int pricePerServing, int caloriesPerServing, String type) async {
   final response = await http.get(
     Uri.parse('$supabaseURL/rest/v1/recipes?'
@@ -15,11 +14,26 @@ Future<Response?> fetchRecipes(
     },
   );
   if (response.statusCode == 200) {
-    final List data = jsonDecode(response.body);
-    print("Recipes: $data");
     return response;
   } else {
-    print("Error: ${response.statusCode} - ${response.body}");
+    return null;
+  }
+}
+
+Future<Response?> fetchFitsyRecipeImages(String query) async {
+  final response = await http.get(
+    Uri.parse('$supabaseURL/rest/v1/rpc/match_recipe?'
+        'query=${Uri.encodeComponent(query)}'),
+    headers: {
+      'apikey': supabaseAnonKey,
+      'Authorization': 'Bearer $supabaseAnonKey',
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    },
+  );
+  if (response.statusCode == 200) {
+    return response;
+  } else {
     return null;
   }
 }

@@ -3,7 +3,7 @@ import 'package:http/http.dart';
 import '../../auth/secrets.dart';
 import 'http_request.dart';
 
-Future<Response?> getImage(String query) async {
+Future<Response?> fetchPixabayImage(String query) async {
   var url = "https://pixabay.com/api/?key=$pixabayApiKey&q=$query=photo"
       "&image_type=photo&category=food";
   var response = await getHttpRequest(url, {});

@@ -43,7 +43,7 @@ class RecipesRepository {
     Future<List<Recipe>> fetchAndFill(String tag, String type) async {
       try {
         final response =
-            await fetchRecipes(pricePerServing, caloriesPerServing, tag);
+            await fetchFitsyRecipes(pricePerServing, caloriesPerServing, tag);
         if (response == null) return [];
         final List data = jsonDecode(response.body);
         data.shuffle();
@@ -89,20 +89,33 @@ class RecipesRepository {
             .cast<Map<String, dynamic>>()
             .map(fromGeminiJsonToDTO))
         .toList();
-    await _fetchPixabayImages(recipes);
+    await _fetchRecipeImages(recipes);
 
     return recipes;
   }
 
-  Future<void> _fetchPixabayImages(List<Recipe> dtos) async {
+  Future<void> _fetchRecipeImages(List<Recipe> dtos) async {
     List<Future<void>> imageFutures = [];
 
     Future<void> fetchImage(Recipe dto) async {
-      Response? imgResponse = await getImage(dto.name!);
-      if (imgResponse != null) {
-        var jsonImgData = jsonDecode(imgResponse.body);
-        var imgUrl = jsonImgData['hits']?[0]['webformatURL'];
-        dto.imgUrl = imgUrl;
+      final name = dto.name ?? "";
+      // Fitsy recipe images api
+      final fitsyResponse = await fetchFitsyRecipeImages(name);
+      if (fitsyResponse != null) {
+        final list = (jsonDecode(fitsyResponse.body) as List?) ?? [];
+        if (list.isNotEmpty) {
+          dto.imgUrl = list.first['img_url'];
+          return;
+        }
+      }
+      // Pixabay api
+      final pixabayResponse = await fetchPixabayImage(name);
+      if (pixabayResponse != null) {
+        final data = jsonDecode(pixabayResponse.body);
+        final hits = (data['hits'] as List?) ?? [];
+        if (hits.isNotEmpty) {
+          dto.imgUrl = hits.first['webformatURL'];
+        }
       }
     }
 
