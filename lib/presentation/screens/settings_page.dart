@@ -1,5 +1,6 @@
 import 'package:fitsy/domain/models/settings.dart';
 import 'package:fitsy/presentation/screens/settings_notifier.dart';
+import 'package:fitsy/presentation/widgets/dynamic_bottom_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,9 +10,11 @@ import '../../domain/enums/gender.dart';
 import '../widgets/outlined_text_field.dart';
 
 class SettingsPage extends ConsumerStatefulWidget {
-  const SettingsPage({super.key, this.onNavigateToRecipesPage});
+  const SettingsPage({super.key, this.onNavigateToRecipesPage, this.bottomBar});
 
   final void Function()? onNavigateToRecipesPage;
+
+  final DynamicBottomBar? bottomBar;
 
   @override
   ConsumerState<SettingsPage> createState() => _OptionsPageState();
@@ -42,7 +45,8 @@ class _OptionsPageState extends ConsumerState<SettingsPage> {
   }
 
   Widget _buildMainContent(Settings userData, SettingsNotifier notifier) {
-    return Column(
+    return Scaffold(
+      body: SafeArea(child: Column(
       children: [
         Expanded(
             child: Card(
@@ -126,7 +130,8 @@ class _OptionsPageState extends ConsumerState<SettingsPage> {
           ),
         ),
       ],
-    );
+    )),
+    bottomNavigationBar: widget.bottomBar);
   }
 
   Widget _padded(Widget child) => Padding(

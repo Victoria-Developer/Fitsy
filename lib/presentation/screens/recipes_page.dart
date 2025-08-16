@@ -1,3 +1,4 @@
+import 'package:fitsy/presentation/widgets/dynamic_bottom_bar.dart';
 import 'package:fitsy/presentation/widgets/visibility_component.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
@@ -6,7 +7,9 @@ import '../../domain/models/recipe.dart';
 import 'meal_pans_notifier.dart';
 
 class RecipesPage extends ConsumerStatefulWidget {
-  const RecipesPage({super.key});
+  const RecipesPage({super.key, required this.bottomBar});
+
+  final DynamicBottomBar bottomBar;
 
   @override
   ConsumerState<RecipesPage> createState() => _RecipesPageState();
@@ -26,70 +29,68 @@ class _RecipesPageState extends ConsumerState<RecipesPage> {
     final mealPlansAsync = ref.watch(mealPlansProvider);
     final notifier = ref.read(mealPlansProvider.notifier);
 
-    return mealPlansAsync.when(
-      loading: () => const Center(
-        child: CircularProgressIndicator(),
-      ),
-      error: (e, st) => const Center(
-        child: Text("Error happened while generating recipes."),
-      ),
-      data: (mealPlans) {
-        if (mealPlans.isEmpty) {
-          return const Center(child: Text("No menu plans found."));
-        }
-        pagesLength = mealPlans.length;
+    return Scaffold(
+        body: SafeArea(
+            child: mealPlansAsync.when(
+          loading: () => const Center(
+            child: CircularProgressIndicator(),
+          ),
+          error: (e, st) => const Center(
+            child: Text("Error happened while generating recipes."),
+          ),
+          data: (mealPlans) {
+            if (mealPlans.isEmpty) {
+              return const Center(child: Text("No menu plans found."));
+            }
+            pagesLength = mealPlans.length;
 
-        final daysButtonsStyle =
-            Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                );
-
-        return Column(
-          children: [
-            Expanded(
-              child: Column(
-                children: [
-                  Expanded(
-                    child: PageView.builder(
-                      controller: controller,
-                      onPageChanged: (page) {
-                        setState(() {
-                          currentPageIndex = page;
-                        });
+            return Column(
+              children: [
+                Expanded(
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: PageView.builder(
+                          controller: controller,
+                          onPageChanged: (page) {
+                            setState(() {
+                              currentPageIndex = page;
+                            });
+                          },
+                          scrollDirection: Axis.horizontal,
+                          physics: const PageScrollPhysics(),
+                          itemCount: mealPlans.length,
+                          itemBuilder: (_, index) =>
+                              _buildMealPlanCard(mealPlans[index]),
+                        ),
+                      ),
+                      _buildDaysButtons(context),
+                      const SizedBox(height: 5),
+                      if (notifier.shouldWarn())
+                        Text(
+                          "Settings updated — click 'New plan'.",
+                          style: TextStyle(color: Colors.red),
+                        ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Align(
+                    alignment: Alignment.bottomCenter,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        notifier.clearAndFetch();
                       },
-                      scrollDirection: Axis.horizontal,
-                      physics: const PageScrollPhysics(),
-                      itemCount: mealPlans.length,
-                      itemBuilder: (_, index) =>
-                          _buildMealPlanCard(mealPlans[index]),
+                      child: const Text("New plan"),
                     ),
                   ),
-                  _buildDaysButtons(daysButtonsStyle),
-                  const SizedBox(height: 5),
-                  if (notifier.shouldWarn())
-                    Text(
-                      "Settings updated — click 'New plan'.",
-                      style: TextStyle(color: Colors.red),
-                    ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Align(
-                alignment: Alignment.bottomCenter,
-                child: ElevatedButton(
-                  onPressed: () {
-                    notifier.clearAndFetch();
-                  },
-                  child: const Text("New plan"),
                 ),
-              ),
-            ),
-          ],
-        );
-      },
-    );
+              ],
+            );
+          },
+        )),
+        bottomNavigationBar: widget.bottomBar);
   }
 
   SizedBox _buildMealPlanCard(List<Recipe> mealPlan) {
@@ -157,7 +158,11 @@ class _RecipesPageState extends ConsumerState<RecipesPage> {
     );
   }
 
-  Widget _buildDaysButtons(TextStyle? daysButtonsStyle) {
+  Widget _buildDaysButtons(BuildContext context) {
+    final daysButtonsStyle = Theme.of(context).textTheme.bodyMedium?.copyWith(
+          fontWeight: FontWeight.bold,
+        );
+
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(

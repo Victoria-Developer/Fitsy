@@ -41,36 +41,28 @@ final routerProvider = Provider<GoRouter>((ref) {
                 onNavigateToRecipesPage: () =>
                     onNavigation(context, recipesRoute)));
           }),
-      StatefulShellRoute.indexedStack(
-        builder: (context, state, navigationShell) {
-          return Scaffold(
-            body: SafeArea(child: navigationShell),
-            bottomNavigationBar: DynamicBottomBar(
-                routes: [recipesRoute, optionsRoute],
-                isSelected: (route) => isSelected(route),
-                onNavigation: (context, route) => onNavigation(context, route)),
-          );
-        },
-        branches: [
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                name: recipesRoute.name,
-                path: recipesRoute.path,
-                pageBuilder: (context, state) => _transition(RecipesPage()),
-              ),
-              GoRoute(
-                name: optionsRoute.name,
-                path: optionsRoute.path,
-                pageBuilder: (context, state) => _transition(SettingsPage()),
-              )
-            ],
-          ),
-        ],
+      GoRoute(
+        name: recipesRoute.name,
+        path: recipesRoute.path,
+        pageBuilder: (context, state) =>
+            _transition(RecipesPage(bottomBar: _buildBottomBar())),
+      ),
+      GoRoute(
+        name: optionsRoute.name,
+        path: optionsRoute.path,
+        pageBuilder: (context, state) =>
+            _transition(SettingsPage(bottomBar: _buildBottomBar())),
       ),
     ],
   );
 });
+
+DynamicBottomBar _buildBottomBar() {
+  return DynamicBottomBar(
+      routes: [recipesRoute, optionsRoute],
+      isSelected: (route) => isSelected(route),
+      onNavigation: (context, route) => onNavigation(context, route));
+}
 
 CustomTransitionPage _transition(Widget child) {
   return CustomTransitionPage(
