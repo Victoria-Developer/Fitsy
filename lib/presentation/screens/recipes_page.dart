@@ -1,7 +1,6 @@
 import 'package:fitsy/presentation/widgets/visibility_component.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../domain/models/recipe.dart';
 import 'meal_pans_notifier.dart';
@@ -22,43 +21,35 @@ class _RecipesPageState extends ConsumerState<RecipesPage> {
       AssetImage('assets/images/recipe-icon-placeholder.png');
   final AssetImage loadingImage = AssetImage('assets/images/loading-icon.gif');
 
-  final dayStyle = GoogleFonts.ebGaramond(
-    fontSize: 25,
-    fontWeight: FontWeight.bold,
-  );
-
-  final titleStyle = GoogleFonts.ebGaramond(
-    fontWeight: FontWeight.bold,
-  );
-
-  final mealInfoStyle = GoogleFonts.ebGaramond(
-    fontStyle: FontStyle.italic,
-  );
-
-  final daysButtonsStyle = GoogleFonts.ebGaramond(
-    fontSize: 18,
-  );
-
   @override
   Widget build(BuildContext context) {
     final mealPlansAsync = ref.watch(mealPlansProvider);
     final notifier = ref.read(mealPlansProvider.notifier);
 
-    return Scaffold(
-      body: Center(
-        child: mealPlansAsync.when(
-          loading: () => const CircularProgressIndicator(),
-          error: (e, st) =>
-              const Text("Error happened while generating recipes."),
-          data: (mealPlans) {
-            if (mealPlans.isEmpty) {
-              return const Text("No menu plans found.");
-            }
-            pagesLength = mealPlans.length;
-            return Column(
-              children: [
-                SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.72,
+    return mealPlansAsync.when(
+      loading: () => const Center(
+        child: CircularProgressIndicator(),
+      ),
+      error: (e, st) => const Center(
+        child: Text("Error happened while generating recipes."),
+      ),
+      data: (mealPlans) {
+        if (mealPlans.isEmpty) {
+          return const Center(child: Text("No menu plans found."));
+        }
+        pagesLength = mealPlans.length;
+
+        final daysButtonsStyle =
+            Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                );
+
+        return Column(
+          children: [
+            Expanded(
+              child: Column(
+                children: [
+                  Expanded(
                     child: PageView.builder(
                       controller: controller,
                       onPageChanged: (page) {
@@ -69,35 +60,46 @@ class _RecipesPageState extends ConsumerState<RecipesPage> {
                       scrollDirection: Axis.horizontal,
                       physics: const PageScrollPhysics(),
                       itemCount: mealPlans.length,
-                      itemBuilder: (_, index) {
-                        return _buildMealPlanCard(mealPlans[index]);
-                      },
-                    )),
-                _buildDaysButtons(),
-                if (notifier.shouldWarn())
-                  Text("Settings updated — click 'New plan'.",
-                      style: TextStyle(
-                        color: Colors.red,
-                      ))
-              ],
-            );
-          },
-        ),
-      ),
-      bottomNavigationBar: Wrap(alignment: WrapAlignment.center, children: [
-        Padding(
-            padding: const EdgeInsets.only(bottom: 10),
-            child: ElevatedButton(
-              onPressed: () {
-                notifier.clearAndFetch();
-              },
-              child: const Text("New plan"),
-            ))
-      ]),
+                      itemBuilder: (_, index) =>
+                          _buildMealPlanCard(mealPlans[index]),
+                    ),
+                  ),
+                  _buildDaysButtons(daysButtonsStyle),
+                  const SizedBox(height: 5),
+                  if (notifier.shouldWarn())
+                    Text(
+                      "Settings updated — click 'New plan'.",
+                      style: TextStyle(color: Colors.red),
+                    ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Align(
+                alignment: Alignment.bottomCenter,
+                child: ElevatedButton(
+                  onPressed: () {
+                    notifier.clearAndFetch();
+                  },
+                  child: const Text("New plan"),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
   SizedBox _buildMealPlanCard(List<Recipe> mealPlan) {
+    final titleStyle = Theme.of(context).textTheme.bodyMedium?.copyWith(
+          fontWeight: FontWeight.bold,
+        );
+    final mealInfoStyle = Theme.of(context).textTheme.bodyMedium?.copyWith(
+          fontStyle: FontStyle.italic,
+        );
+
     return SizedBox(
         width: MediaQuery.of(context).size.width,
         child: Card(
@@ -105,7 +107,10 @@ class _RecipesPageState extends ConsumerState<RecipesPage> {
           child: Column(
             children: [
               SizedBox(height: 20),
-              Text("Day ${mealPlan.first.dayId}", style: dayStyle),
+              Text("Day ${mealPlan.first.dayId}",
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      )),
               SizedBox(height: 10),
               Column(
                   children: mealPlan.map((recipe) {
@@ -152,18 +157,18 @@ class _RecipesPageState extends ConsumerState<RecipesPage> {
     );
   }
 
-  Widget _buildDaysButtons() {
+  Widget _buildDaysButtons(TextStyle? daysButtonsStyle) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
         children: [
           for (int i = 0; i < pagesLength; i++)
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 3),
+              padding: const EdgeInsets.symmetric(horizontal: 1),
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size(40, 40),
-                  padding: const EdgeInsets.all(5),
+                  padding: const EdgeInsets.all(3),
                   backgroundColor: currentPageIndex == i
                       ? Colors.green
                       : Colors.grey.shade300,
@@ -180,7 +185,7 @@ class _RecipesPageState extends ConsumerState<RecipesPage> {
                     curve: Curves.easeInOut,
                   );
                 },
-                child: Text("Day ${i + 1}", style: daysButtonsStyle),
+                child: Text("${i + 1}", style: daysButtonsStyle),
               ),
             ),
         ],

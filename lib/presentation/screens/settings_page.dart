@@ -3,7 +3,6 @@ import 'package:fitsy/presentation/screens/settings_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../domain/enums/activity.dart';
 import '../../domain/enums/gender.dart';
@@ -20,7 +19,6 @@ class SettingsPage extends ConsumerStatefulWidget {
 
 class _OptionsPageState extends ConsumerState<SettingsPage> {
   final daysList = List.generate(7, (index) => index + 1);
-  final submitButtonStyle = GoogleFonts.ebGaramond(fontWeight: FontWeight.bold);
 
   @override
   void initState() {
@@ -44,88 +42,91 @@ class _OptionsPageState extends ConsumerState<SettingsPage> {
   }
 
   Widget _buildMainContent(Settings userData, SettingsNotifier notifier) {
-    return Scaffold(
-        body: Card(
-            child: Center(
+    return Column(
+      children: [
+        Expanded(
+            child: Card(
           child: SingleChildScrollView(
-              child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _padded(_wrap([
-                const Text('Use AI for menu plans: '),
-                Switch(
-                  value: userData.useAI,
-                  activeColor: Colors.cyan,
-                  onChanged: (bool value) {
-                    setState(() {
-                      notifier.setUseAI(value);
-                    });
-                  },
-                )
-              ])),
-              _padded(
-                _wrap([
-                  const Text('Meal plan for: '),
-                  _buildDropDownList(
-                    userData.days,
-                    daysList,
-                    (value) => notifier.setDays(value),
-                    (value) => value.toString(),
-                  ),
-                  const Text('days'),
-                ]),
-              ),
-              _padded(
-                _wrap([
-                  const Text("Gender: "),
-                  _buildDropDownList(
-                    userData.gender,
-                    Gender.values,
-                    (value) => notifier.setGender(value),
-                    (value) => value.name,
-                  ),
-                ]),
-              ),
-              _padded(
-                _wrap([
-                  const Text("Exercises intensity: "),
-                  _buildDropDownList(
-                    userData.activity,
-                    Activity.values,
-                    (value) => notifier.setActivity(value),
-                    (value) => value.name,
-                  ),
-                ]),
-              ),
-              _padded(
-                _buildNumericTextField(
-                    'Age:', userData.age, (value) => notifier.setAge(value)),
-              ),
-              _padded(
-                _buildNumericTextField('Weight (kg):', userData.weight,
-                    (value) => notifier.setWeight(value)),
-              ),
-              _padded(
-                _buildNumericTextField('Height (cm):', userData.height,
-                    (value) => notifier.setHeight(value)),
-              ),
-              _padded(
-                _buildNumericTextField('Budget per day (usd):', userData.budget,
-                    (value) => notifier.setBudget(value)),
-              )
-            ],
-          )),
-        )),
-        bottomNavigationBar: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(top: 10.0, bottom: 20.0),
-              // adjust as needed
-              child: _buildSubmitButton(userData.isFirstLaunch, notifier),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _padded(_wrap([
+                  const Text('Use AI for menu plans: '),
+                  Switch(
+                    value: userData.useAI,
+                    activeColor: Colors.cyan,
+                    onChanged: (bool value) {
+                      setState(() {
+                        notifier.setUseAI(value);
+                      });
+                    },
+                  )
+                ])),
+                _padded(
+                  _wrap([
+                    const Text('Meal plan for: '),
+                    _buildDropDownList(
+                      userData.days,
+                      daysList,
+                      (value) => notifier.setDays(value),
+                      (value) => value.toString(),
+                    ),
+                    const Text('days'),
+                  ]),
+                ),
+                _padded(
+                  _wrap([
+                    const Text("Gender: "),
+                    _buildDropDownList(
+                      userData.gender,
+                      Gender.values,
+                      (value) => notifier.setGender(value),
+                      (value) => value.name,
+                    ),
+                  ]),
+                ),
+                _padded(
+                  _wrap([
+                    const Text("Exercises intensity: "),
+                    _buildDropDownList(
+                      userData.activity,
+                      Activity.values,
+                      (value) => notifier.setActivity(value),
+                      (value) => value.name,
+                    ),
+                  ]),
+                ),
+                _padded(
+                  _buildNumericTextField(
+                      'Age:', userData.age, (value) => notifier.setAge(value)),
+                ),
+                _padded(
+                  _buildNumericTextField('Weight (kg):', userData.weight,
+                      (value) => notifier.setWeight(value)),
+                ),
+                _padded(
+                  _buildNumericTextField('Height (cm):', userData.height,
+                      (value) => notifier.setHeight(value)),
+                ),
+                _padded(
+                  _buildNumericTextField('Budget per day (usd):',
+                      userData.budget, (value) => notifier.setBudget(value)),
+                ),
+              ],
             ),
-          ],
-        ));
+          ),
+        )),
+
+        // fixed bottom button
+        Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: _buildSubmitButton(userData.isFirstLaunch, notifier),
+          ),
+        ),
+      ],
+    );
   }
 
   Widget _padded(Widget child) => Padding(
@@ -171,11 +172,13 @@ class _OptionsPageState extends ConsumerState<SettingsPage> {
         decoration: BoxDecoration(
             color: Colors.white, borderRadius: BorderRadius.circular(10)),
         child: DropdownButton<T>(
+          style: Theme.of(context).textTheme.bodyMedium,
           value: listValue,
           items: list.map<DropdownMenuItem<T>>((T value) {
             return DropdownMenuItem<T>(
               value: value,
-              child: Text(toString(value)),
+              child: Text(toString(value),
+                  style: Theme.of(context).textTheme.bodyMedium),
             );
           }).toList(),
           onChanged: (T? value) {
@@ -207,8 +210,10 @@ class _OptionsPageState extends ConsumerState<SettingsPage> {
                 widget.onNavigateToRecipesPage?.call();
               }
             },
-            child:
-                Text(isFirstLaunch ? "Next" : "Save", style: submitButtonStyle),
+            child: Text(isFirstLaunch ? "Next" : "Save",
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    )),
           )
         ]);
   }
