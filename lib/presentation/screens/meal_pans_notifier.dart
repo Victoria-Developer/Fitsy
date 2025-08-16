@@ -11,11 +11,13 @@ AsyncNotifierProvider<MealPlansNotifier, List<List<Recipe>>>(MealPlansNotifier.n
 class MealPlansNotifier extends AsyncNotifier<List<List<Recipe>>> {
   late RecipesRepository _repo;
   late Settings _settings;
+  late SettingsNotifier _settingsNotifier;
 
   @override
   Future<List<List<Recipe>>> build() async {
     _repo = await ref.read(recipesRepositoryProvider.future);
-    _settings = await ref.read(settingsProvider.future);
+    _settingsNotifier = await ref.read(settingsProvider.notifier);
+    _settings = _settingsNotifier.userData;
 
     final dbPlans = await _repo.getDatabaseMealPlans();
     if (dbPlans.isEmpty) {
@@ -26,6 +28,7 @@ class MealPlansNotifier extends AsyncNotifier<List<List<Recipe>>> {
   }
 
   Future<List<List<Recipe>>> fetchNewMealPlans() async {
+    _settingsNotifier.shouldWarnAboutChanges = false;
     final newPlans = await _repo.fetchMeals(
       _settings.days,
       _settings.calories,
@@ -41,4 +44,9 @@ class MealPlansNotifier extends AsyncNotifier<List<List<Recipe>>> {
     state = const AsyncLoading();
     await fetchNewMealPlans();
   }
+
+  bool shouldWarn() {
+    return  _settingsNotifier.shouldWarnAboutChanges;
+  }
+
 }

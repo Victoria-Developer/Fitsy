@@ -1,7 +1,6 @@
 import 'package:fitsy/domain/enums/gender.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-
 import '../../data/repositories/settings_repository.dart';
 import '../../domain/enums/activity.dart';
 import '../../domain/models/settings.dart';
@@ -13,6 +12,8 @@ class SettingsNotifier extends AsyncNotifier<Settings> {
   late SettingsRepository _settingsRepo;
   final Settings _originalUserData = Settings();
   Settings userData = Settings();
+  bool isDataSaved = true;
+  bool shouldWarnAboutChanges = false;
 
   @override
   Future<Settings> build() async {
@@ -22,57 +23,57 @@ class SettingsNotifier extends AsyncNotifier<Settings> {
     return userData;
   }
 
-  setDays(int days){
-    userData.days = days;
+  _onChange(Function action) {
+    action();
+    isDataSaved = false;
     state = AsyncData(userData);
   }
 
-  setGender(Gender gender){
-    userData.gender = gender;
-    state = AsyncData(userData);
+  setUseAI(bool useAI) {
+    _onChange(() => userData.useAI = useAI);
   }
 
-  setActivity(Activity activity){
-    userData.activity = activity;
-    state = AsyncData(userData);
+  setDays(int days) {
+    _onChange(() => userData.days = days);
   }
 
-  setAge(int age){
-    userData.age = age;
-    state = AsyncData(userData);
+  setGender(Gender gender) {
+    _onChange(() => userData.gender = gender);
   }
 
-  setWeight(int weight){
-    userData.weight = weight;
-    state = AsyncData(userData);
+  setActivity(Activity activity) {
+    _onChange(() => userData.activity = activity);
   }
 
-  setHeight(int height){
-    userData.height = height;
-    state = AsyncData(userData);
+  setAge(int age) {
+    _onChange(() => userData.age = age);
   }
 
-  setBudget(int budget){
-    userData.budget = budget;
-    state = AsyncData(userData);
+  setWeight(int weight) {
+    _onChange(() => userData.weight = weight);
   }
 
-  setFirstLaunch(bool isFirstLaunch){
-    userData.isFirstLaunch = isFirstLaunch;
-    state = AsyncData(userData);
+  setHeight(int height) {
+    _onChange(() => userData.height = height);
   }
 
-  setUseAI(bool useAI){
-    userData.useAI = useAI;
-    state = AsyncData(userData);
+  setBudget(int budget) {
+    _onChange(() => userData.budget = budget);
   }
 
   saveSettings() async {
+    if (userData.isFirstLaunch) {
+      userData.isFirstLaunch = false;
+    }
     _originalUserData.copyWith(userData);
     _settingsRepo.saveSettings(userData);
+    isDataSaved = true;
+    shouldWarnAboutChanges = true;
+    state = AsyncData(userData);
   }
 
   reset() {
+    isDataSaved = true;
     userData.copyWith(_originalUserData);
     state = AsyncData(userData);
   }

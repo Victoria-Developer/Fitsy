@@ -190,15 +190,26 @@ class _OptionsPageState extends ConsumerState<SettingsPage> {
   }
 
   Widget _buildSubmitButton(bool isFirstLaunch, SettingsNotifier notifier) {
-    return ElevatedButton(
-      onPressed: () {
-        if (isFirstLaunch) {
-          notifier.setFirstLaunch(false);
-          widget.onNavigateToRecipesPage?.call();
-        }
-        notifier.saveSettings();
-      },
-      child: Text(isFirstLaunch ? "Next" : "Save", style: submitButtonStyle),
-    );
+    return Wrap(
+        spacing: 7,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        direction: Axis.vertical,
+        children: [
+          if (!notifier.isDataSaved)
+            Text("You've changed settings. Please, save.",
+                style: TextStyle(
+                  color: Colors.red,
+                )),
+          ElevatedButton(
+            onPressed: () {
+              notifier.saveSettings();
+              if (isFirstLaunch) {
+                widget.onNavigateToRecipesPage?.call();
+              }
+            },
+            child:
+                Text(isFirstLaunch ? "Next" : "Save", style: submitButtonStyle),
+          )
+        ]);
   }
 }
