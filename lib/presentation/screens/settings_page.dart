@@ -22,14 +22,31 @@ class SettingsPage extends ConsumerStatefulWidget {
 
 class _OptionsPageState extends ConsumerState<SettingsPage> {
   final daysList = List.generate(7, (index) => index + 1);
+  late TextEditingController ageController;
+  late TextEditingController weightController;
+  late TextEditingController heightController;
+  late TextEditingController budgetController;
 
   @override
   void initState() {
     super.initState();
+    ageController = TextEditingController();
+    weightController = TextEditingController();
+    heightController = TextEditingController();
+    budgetController = TextEditingController();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // Reset settings to original each time user opens the page
       ref.read(settingsProvider.notifier).reset();
     });
+  }
+
+  @override
+  void dispose() {
+    ageController.dispose();
+    weightController.dispose();
+    heightController.dispose();
+    budgetController.dispose();
+    super.dispose();
   }
 
   @override
@@ -45,108 +62,91 @@ class _OptionsPageState extends ConsumerState<SettingsPage> {
   }
 
   Widget _buildMainContent(Settings userData, SettingsNotifier notifier) {
-    return Scaffold(
-      body: SafeArea(child: Column(
-      children: [
-        Expanded(
-            child: Card(
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _padded(_wrap([
-                  const Text('Use AI for menu plans: '),
-                  Switch(
-                    value: userData.useAI,
-                    activeColor: Colors.cyan,
-                    onChanged: (bool value) {
-                      setState(() {
-                        notifier.setUseAI(value);
-                      });
-                    },
-                  )
-                ])),
-                _padded(
-                  _wrap([
-                    const Text('Meal plan for: '),
-                    _buildDropDownList(
-                      userData.days,
-                      daysList,
-                      (value) => notifier.setDays(value),
-                      (value) => value.toString(),
-                    ),
-                    const Text('days'),
-                  ]),
-                ),
-                _padded(
-                  _wrap([
-                    const Text("Gender: "),
-                    _buildDropDownList(
-                      userData.gender,
-                      Gender.values,
-                      (value) => notifier.setGender(value),
-                      (value) => value.name,
-                    ),
-                  ]),
-                ),
-                _padded(
-                  _wrap([
-                    const Text("Exercises intensity: "),
-                    _buildDropDownList(
-                      userData.activity,
-                      Activity.values,
-                      (value) => notifier.setActivity(value),
-                      (value) => value.name,
-                    ),
-                  ]),
-                ),
-                _padded(
-                  _buildNumericTextField(
-                      'Age:', userData.age, (value) => notifier.setAge(value)),
-                ),
-                _padded(
-                  _buildNumericTextField('Weight (kg):', userData.weight,
-                      (value) => notifier.setWeight(value)),
-                ),
-                _padded(
-                  _buildNumericTextField('Height (cm):', userData.height,
-                      (value) => notifier.setHeight(value)),
-                ),
-                _padded(
-                  _buildNumericTextField('Budget per day (usd):',
-                      userData.budget, (value) => notifier.setBudget(value)),
-                ),
-              ],
-            ),
-          ),
-        )),
+    ageController.text = userData.age.toString();
+    weightController.text = userData.weight.toString();
+    heightController.text = userData.height.toString();
+    budgetController.text = userData.budget.toString();
 
-        // fixed bottom button
-        Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Align(
-            alignment: Alignment.bottomCenter,
-            child: _buildSubmitButton(userData.isFirstLaunch, notifier),
-          ),
+    final widgets = <Widget>[
+      _wrap([
+        const Text('Use AI for menu plans: '),
+        Switch(
+          value: userData.useAI,
+          activeColor: Colors.cyan,
+          onChanged: (bool value) {
+            setState(() => notifier.setUseAI(value));
+          },
         ),
-      ],
-    )),
-    bottomNavigationBar: widget.bottomBar);
-  }
+      ]),
+      _wrap([
+        const Text('Meal plan for: '),
+        _buildDropDownList(
+          userData.days,
+          daysList,
+          (value) => notifier.setDays(value),
+          (value) => value.toString(),
+        ),
+        const Text('days'),
+      ]),
+      _wrap([
+        const Text("Gender: "),
+        _buildDropDownList(
+          userData.gender,
+          Gender.values,
+          (value) => notifier.setGender(value),
+          (value) => value.name,
+        ),
+      ]),
+      _wrap([
+        const Text("Exercises intensity: "),
+        _buildDropDownList(
+          userData.activity,
+          Activity.values,
+          (value) => notifier.setActivity(value),
+          (value) => value.name,
+        ),
+      ]),
+      _buildNumericTextField('Age:', notifier.setAge, ageController),
+      _buildNumericTextField(
+          'Weight (kg):', notifier.setWeight, weightController),
+      _buildNumericTextField(
+          'Height (cm):', notifier.setHeight, heightController),
+      _buildNumericTextField(
+          'Budget per day (usd):', notifier.setBudget, budgetController),
+    ];
 
-  Widget _padded(Widget child) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
-        child: child,
-      );
+    return Scaffold(
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: ListView.separated(
+                padding: const EdgeInsets.only(top: 60, bottom: 10),
+                itemCount: widgets.length,
+                itemBuilder: (context, index) => Center(child: widgets[index]),
+                separatorBuilder: (context, index) =>
+                    const SizedBox(height: 17),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: _buildSubmitButton(userData.isFirstLaunch, notifier),
+            ),
+          ],
+        ),
+      ),
+      bottomNavigationBar: widget.bottomBar,
+    );
+  }
 
   Widget _wrap(List<Widget> children) => Wrap(
       crossAxisAlignment: WrapCrossAlignment.center,
       direction: Axis.horizontal,
-      spacing: 20, // <-- Spacing between children
+      spacing: 15, // <-- Spacing between children
       children: children);
 
-  Widget _buildNumericTextField(
-      String label, int initialValue, ValueChanged<int> onChanged) {
+  Widget _buildNumericTextField(String label, ValueChanged<int> onChanged,
+      TextEditingController? controller) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -158,7 +158,7 @@ class _OptionsPageState extends ConsumerState<SettingsPage> {
         SizedBox(
           width: 80,
           child: OutlinedTextField(
-              initialValue: initialValue.toString(),
+              controller: controller,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               onEdit: (value) => onChanged(int.parse(value))),
         ),

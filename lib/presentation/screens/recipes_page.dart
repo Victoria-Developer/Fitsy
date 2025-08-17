@@ -66,7 +66,7 @@ class _RecipesPageState extends ConsumerState<RecipesPage> {
                       ),
                       _buildDaysButtons(context),
                       const SizedBox(height: 5),
-                      if (notifier.shouldWarn())
+                      if (notifier.hasSettingsDataChanged())
                         Text(
                           "Settings updated — click 'New plan'.",
                           style: TextStyle(color: Colors.red),

@@ -28,7 +28,7 @@ class MealPlansNotifier extends AsyncNotifier<List<List<Recipe>>> {
   }
 
   Future<List<List<Recipe>>> fetchNewMealPlans() async {
-    _settingsNotifier.shouldWarnAboutChanges = false;
+    _settingsNotifier.hasDataChanged = false;
     final newPlans = await _repo.fetchMeals(
       _settings.days,
       _settings.calories,
@@ -45,8 +45,8 @@ class MealPlansNotifier extends AsyncNotifier<List<List<Recipe>>> {
     await fetchNewMealPlans();
   }
 
-  bool shouldWarn() {
-    return  _settingsNotifier.shouldWarnAboutChanges;
+  bool hasSettingsDataChanged() {
+    return  _settingsNotifier.hasDataChanged;
   }
 
 }

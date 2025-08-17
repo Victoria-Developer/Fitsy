@@ -2,22 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class OutlinedTextField extends StatelessWidget {
-  const OutlinedTextField({
-    super.key,
-    this.initialValue = "",
-    this.inputFormatters = const [],
-    this.onEdit,
-  });
+  const OutlinedTextField(
+      {super.key,
+      this.inputFormatters = const [],
+      this.onEdit,
+      this.controller});
 
-  final String initialValue;
   final List<TextInputFormatter> inputFormatters;
 
   final void Function(String)? onEdit;
+  final TextEditingController? controller;
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
-      initialValue: initialValue,
+      controller: controller,
       onChanged: (text) {
         onEdit!(text);
       },
