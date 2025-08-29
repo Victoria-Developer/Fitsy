@@ -1,25 +1,25 @@
 import 'package:fitsy/domain/enums/gender.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../data/repositories/settings_repository.dart';
-import '../../domain/enums/activity.dart';
-import '../../domain/models/settings.dart';
+import '../../../data/local/repositories/local_settings_repository.dart';
+import '../../../domain/enums/activity.dart';
+import '../../../domain/models/settings.dart';
 
-final settingsProvider =
-    AsyncNotifierProvider<SettingsNotifier, Settings>(SettingsNotifier.new);
-
+@Riverpod(keepAlive: true)
 class SettingsNotifier extends AsyncNotifier<Settings> {
-  late SettingsRepository _settingsRepo;
-  final Settings _originalUserData = Settings();
-  Settings userData = Settings();
+  late LocalSettingsRepository _settingsRepo;
+  late Settings _originalUserData;
+  late Settings userData;
   bool isDataSaved = true;
   bool hasDataChanged = false;
 
   @override
   Future<Settings> build() async {
-    _settingsRepo = await ref.read(settingsRepositoryProvider.future);
-    userData = await _settingsRepo.loadSettings();
-    _originalUserData.copyWith(userData);
+    final (repo, settings) = await ref.read(localSettingsRepositoryProvider.future);
+    _settingsRepo = repo;
+    _originalUserData = settings;
+    userData = Settings();
+    userData.copyWith(settings);
     return userData;
   }
 
@@ -38,8 +38,8 @@ class SettingsNotifier extends AsyncNotifier<Settings> {
   setGender(Gender gender) =>
       _onChange(_originalUserData.gender, gender, (v) => userData.gender = v);
 
-  setActivity(Activity activity) =>
-      _onChange(_originalUserData.activity, activity, (v) => userData.activity = v);
+  setActivity(Activity activity) => _onChange(
+      _originalUserData.activity, activity, (v) => userData.activity = v);
 
   setAge(int age) =>
       _onChange(_originalUserData.age, age, (v) => userData.age = v);
@@ -70,3 +70,6 @@ class SettingsNotifier extends AsyncNotifier<Settings> {
     state = AsyncData(userData);
   }
 }
+
+final settingsProvider =
+    AsyncNotifierProvider<SettingsNotifier, Settings>(SettingsNotifier.new);

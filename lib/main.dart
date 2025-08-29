@@ -4,6 +4,11 @@ import 'package:fitsy/presentation/themes/util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'data/local/repositories/local_recipes_repository.dart';
+import 'data/local/repositories/local_settings_repository.dart';
+import 'domain/enums/app_state.dart';
+
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(const ProviderScope(child: App()));
@@ -27,3 +32,18 @@ class App extends ConsumerWidget {
     );
   }
 }
+
+class AppStateNotifier extends AsyncNotifier<AppState> {
+
+  @override
+  Future<AppState> build() async {
+    final (settings, _) = await (
+    ref.read(localSettingsRepositoryProvider.future),
+    ref.read(localRecipesRepositoryProvider.future)
+    ).wait;
+    return settings.$2.isFirstLaunch ? AppState.onboarding : AppState.home;
+  }
+}
+
+final appStateProvider =
+AsyncNotifierProvider<AppStateNotifier, AppState>(AppStateNotifier.new);

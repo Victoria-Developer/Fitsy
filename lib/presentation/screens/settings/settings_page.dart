@@ -1,18 +1,19 @@
 import 'package:fitsy/domain/models/settings.dart';
-import 'package:fitsy/presentation/screens/settings_notifier.dart';
+import 'package:fitsy/presentation/navigation/app_navigator.dart';
+import 'package:fitsy/presentation/screens/settings/settings_notifier.dart';
 import 'package:fitsy/presentation/widgets/dynamic_bottom_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../domain/enums/activity.dart';
-import '../../domain/enums/gender.dart';
-import '../widgets/outlined_text_field.dart';
+import '../../../domain/enums/activity.dart';
+import '../../../domain/enums/gender.dart';
+import '../../widgets/outlined_text_field.dart';
 
 class SettingsPage extends ConsumerStatefulWidget {
-  const SettingsPage({super.key, this.onNavigateToRecipesPage, this.bottomBar});
+  const SettingsPage({super.key, this.onOnboardingComplete, this.bottomBar});
 
-  final void Function()? onNavigateToRecipesPage;
+  final void Function()? onOnboardingComplete;
 
   final DynamicBottomBar? bottomBar;
 
@@ -26,6 +27,8 @@ class _OptionsPageState extends ConsumerState<SettingsPage> {
   late TextEditingController weightController;
   late TextEditingController heightController;
   late TextEditingController budgetController;
+  late Settings userData;
+  late SettingsNotifier notifier;
 
   @override
   void initState() {
@@ -34,10 +37,6 @@ class _OptionsPageState extends ConsumerState<SettingsPage> {
     weightController = TextEditingController();
     heightController = TextEditingController();
     budgetController = TextEditingController();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Reset settings to original each time user opens the page
-      ref.read(settingsProvider.notifier).reset();
-    });
   }
 
   @override
@@ -52,16 +51,25 @@ class _OptionsPageState extends ConsumerState<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     final settingsAsync = ref.watch(settingsProvider);
-    final notifier = ref.read(settingsProvider.notifier);
 
     return settingsAsync.when(
       loading: () => const CircularProgressIndicator(),
       error: (e, st) => const Text("Error happened while loading settings."),
-      data: (userData) => _buildMainContent(userData, notifier),
+      data: (userData) {
+        this.userData = userData;
+        notifier = ref.read(settingsProvider.notifier);
+        return _buildMainContent();
+      },
     );
   }
 
-  Widget _buildMainContent(Settings userData, SettingsNotifier notifier) {
+  Widget _buildMainContent() {
+    // Reset main content each time user navigates to another screen
+    // to prevent showing unsaved settings
+    ref.listen(navigationProvider, (prev, next) {
+      notifier.reset();
+    });
+
     ageController.text = userData.age.toString();
     weightController.text = userData.weight.toString();
     heightController.text = userData.height.toString();
@@ -130,7 +138,7 @@ class _OptionsPageState extends ConsumerState<SettingsPage> {
             ),
             Padding(
               padding: const EdgeInsets.all(12.0),
-              child: _buildSubmitButton(userData.isFirstLaunch, notifier),
+              child: _buildSubmitButton(),
             ),
           ],
         ),
@@ -197,7 +205,8 @@ class _OptionsPageState extends ConsumerState<SettingsPage> {
         ));
   }
 
-  Widget _buildSubmitButton(bool isFirstLaunch, SettingsNotifier notifier) {
+  Widget _buildSubmitButton() {
+    final isFirstLaunch = userData.isFirstLaunch;
     return Wrap(
         spacing: 7,
         crossAxisAlignment: WrapCrossAlignment.center,
@@ -212,7 +221,8 @@ class _OptionsPageState extends ConsumerState<SettingsPage> {
             onPressed: () {
               notifier.saveSettings();
               if (isFirstLaunch) {
-                widget.onNavigateToRecipesPage?.call();
+                print("call in settings");
+                widget.onOnboardingComplete?.call();
               }
             },
             child: Text(isFirstLaunch ? "Next" : "Save",

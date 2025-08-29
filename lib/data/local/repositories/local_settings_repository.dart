@@ -5,7 +5,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 @Riverpod(keepAlive: true)
-class SettingsRepository {
+class LocalSettingsRepository {
   late final SharedPreferences _preferences;
 
   final String _daysKey = "days";
@@ -23,31 +23,31 @@ class SettingsRepository {
     _preferences = await SharedPreferences.getInstance();
     Settings userData = Settings();
 
-    changeVal(_preferences.getInt(_daysKey), (val) => userData.days = val);
-    changeVal(
+    _changeVal(_preferences.getInt(_daysKey), (val) => userData.days = val);
+    _changeVal(
         _preferences.getInt(_caloriesKey), (val) => userData.calories = val);
-    changeVal(_preferences.getInt(_budgetKey), (val) => userData.budget = val);
-    changeVal(_preferences.getInt(_weightKey), (val) => userData.weight = val);
-    changeVal(_preferences.getInt(_heightKey), (val) => userData.height = val);
-    changeVal(_preferences.getInt(_ageKey), (val) => userData.age = val);
-    changeVal<String>(
+    _changeVal(_preferences.getInt(_budgetKey), (val) => userData.budget = val);
+    _changeVal(_preferences.getInt(_weightKey), (val) => userData.weight = val);
+    _changeVal(_preferences.getInt(_heightKey), (val) => userData.height = val);
+    _changeVal(_preferences.getInt(_ageKey), (val) => userData.age = val);
+    _changeVal<String>(
       _preferences.getString(_genderKey),
       (val) => userData.gender = Gender.values.byName(val),
     );
-    changeVal<String>(
+    _changeVal<String>(
       _preferences.getString(_activityLevelKey),
       (val) => userData.activity = Activity.values.byName(val),
     );
-    changeVal(_preferences.getBool(_isFirstLaunchKey),
+    _changeVal(_preferences.getBool(_isFirstLaunchKey),
         (val) => userData.isFirstLaunch = val);
 
-    changeVal(_preferences.getBool(_useAIKey),
+    _changeVal(_preferences.getBool(_useAIKey),
             (val) => userData.useAI = val);
 
     return userData;
   }
 
-  void changeVal<T>(T? value, void Function(T val) onChange) {
+  void _changeVal<T>(T? value, void Function(T val) onChange) {
     if (value != null) onChange(value);
   }
 
@@ -79,10 +79,9 @@ class SettingsRepository {
   }
 }
 
-// SettingsRepository prover used by rest of the app.
-final settingsRepositoryProvider =
-    FutureProvider<SettingsRepository>((ref) async {
-  final settingsRepository = SettingsRepository();
-  //await settingsRepository.loadSettings();
-  return settingsRepository;
+final localSettingsRepositoryProvider =
+FutureProvider<(LocalSettingsRepository, Settings)>((ref) async {
+  final repo = LocalSettingsRepository();
+  final settings = await repo.loadSettings();
+  return (repo, settings);
 });

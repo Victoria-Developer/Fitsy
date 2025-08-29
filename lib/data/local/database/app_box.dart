@@ -1,7 +1,7 @@
-import 'package:fitsy/data/entities/recipe_entity.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
+import '../entities/recipe_entity.dart';
 import 'objectbox.g.dart'; // created by `flutter pub run build_runner build`
 
 class AppBox {

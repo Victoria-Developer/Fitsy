@@ -1,20 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../navigation/app_navigator.dart';
 import '../navigation/route.dart';
 
-class DynamicBottomBar extends StatelessWidget {
+class DynamicBottomBar extends ConsumerStatefulWidget {
   const DynamicBottomBar({
     super.key,
-      required this.routes,
-      required this.isSelected,
-      required this.onNavigation
+    required this.routes,
   });
 
   final List<NavRoute> routes;
-  final bool Function(NavRoute route) isSelected;
-  final void Function(BuildContext context, NavRoute route) onNavigation;
 
   @override
+  ConsumerState<DynamicBottomBar> createState() => _DynamicBottomBarState();
+}
+
+class _DynamicBottomBarState extends ConsumerState<DynamicBottomBar> {
+  @override
   Widget build(BuildContext context) {
+    final currentRoute = ref.watch(navigationProvider);
+    final notifier = ref.read(navigationProvider.notifier);
     return BottomAppBar(
       shape: const CircularNotchedRectangle(),
       notchMargin: 5.0,
@@ -24,21 +29,25 @@ class DynamicBottomBar extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.max,
           mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: <Widget>[
-            for (int i = 0; i < routes.length; i++)
-              _buildIconButton(context, routes[i]),
-          ],
+          children: _buildButtons(
+              widget.routes, currentRoute, (route) => notifier.setRoute(route)),
         ),
       ),
     );
   }
 
-  IconButton _buildIconButton(context, NavRoute route) {
-    Widget icon = route.icon ?? const Icon(Icons.insert_comment_sharp);
-    return IconButton(
-        icon: icon,
-        iconSize: 30.0,
-        isSelected: isSelected(route),
-        onPressed: () => onNavigation(context, route));
+  List<Widget> _buildButtons(List<NavRoute> routes, NavRoute currentRoute,
+      void Function(NavRoute) onPressed) {
+    List<Widget> buttons = [];
+    for (var route in routes) {
+      Widget icon = route.icon ?? const Icon(Icons.insert_comment_sharp);
+      final button = IconButton(
+          icon: icon,
+          iconSize: 30.0,
+          isSelected: currentRoute == route,
+          onPressed: () => onPressed(route));
+      buttons.add(button);
+    }
+    return buttons;
   }
 }

@@ -3,22 +3,22 @@ import 'package:fitsy/presentation/widgets/visibility_component.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
 
-import '../../domain/models/recipe.dart';
-import 'meal_pans_notifier.dart';
+import '../../../domain/models/recipe.dart';
+import 'generator_notifier.dart';
 
-class RecipesPage extends ConsumerStatefulWidget {
-  const RecipesPage({super.key, required this.bottomBar});
+class GeneratorPage extends ConsumerStatefulWidget {
+  const GeneratorPage({super.key, required this.bottomBar});
 
   final DynamicBottomBar bottomBar;
 
   @override
-  ConsumerState<RecipesPage> createState() => _RecipesPageState();
+  ConsumerState<GeneratorPage> createState() => _GeneratorPageState();
 }
 
-class _RecipesPageState extends ConsumerState<RecipesPage> {
+class _GeneratorPageState extends ConsumerState<GeneratorPage> {
   int currentPageIndex = 0;
   int pagesLength = 0;
-  final controller = PageController();
+  final pageController = PageController();
 
   final AssetImage placeholderImage =
       AssetImage('assets/images/recipe-icon-placeholder.png');
@@ -26,12 +26,12 @@ class _RecipesPageState extends ConsumerState<RecipesPage> {
 
   @override
   Widget build(BuildContext context) {
-    final mealPlansAsync = ref.watch(mealPlansProvider);
-    final notifier = ref.read(mealPlansProvider.notifier);
+    final dataAsync = ref.watch(generatorProvider);
+    final notifier = ref.read(generatorProvider.notifier);
 
     return Scaffold(
         body: SafeArea(
-            child: mealPlansAsync.when(
+            child: dataAsync.when(
           loading: () => const Center(
             child: CircularProgressIndicator(),
           ),
@@ -51,7 +51,7 @@ class _RecipesPageState extends ConsumerState<RecipesPage> {
                     children: [
                       Expanded(
                         child: PageView.builder(
-                          controller: controller,
+                          controller: pageController,
                           onPageChanged: (page) {
                             setState(() {
                               currentPageIndex = page;
@@ -184,7 +184,7 @@ class _RecipesPageState extends ConsumerState<RecipesPage> {
                   setState(() {
                     currentPageIndex = i;
                   });
-                  controller.animateToPage(
+                  pageController.animateToPage(
                     currentPageIndex,
                     duration: const Duration(milliseconds: 300),
                     curve: Curves.easeInOut,
