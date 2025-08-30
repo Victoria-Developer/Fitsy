@@ -4,12 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
 
 import '../../../domain/models/recipe.dart';
+import '../../widgets/warning_widget.dart';
 import 'generator_notifier.dart';
 
 class GeneratorPage extends ConsumerStatefulWidget {
-  const GeneratorPage({super.key, required this.bottomBar});
-
-  final DynamicBottomBar bottomBar;
+  const GeneratorPage({super.key});
 
   @override
   ConsumerState<GeneratorPage> createState() => _GeneratorPageState();
@@ -46,6 +45,10 @@ class _GeneratorPageState extends ConsumerState<GeneratorPage> {
 
             return Column(
               children: [
+                WarningWidget(
+                    isShown: notifier.hasSettingsChanged,
+                    message:
+                        "Settings updated! Generate your next meal."),
                 Expanded(
                   child: Column(
                     children: [
@@ -66,40 +69,39 @@ class _GeneratorPageState extends ConsumerState<GeneratorPage> {
                       ),
                       _buildDaysButtons(context),
                       const SizedBox(height: 5),
-                      if (notifier.hasSettingsDataChanged())
-                        Text(
-                          "Settings updated — click 'New plan'.",
-                          style: TextStyle(color: Colors.red),
-                        ),
                     ],
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: Align(
-                    alignment: Alignment.bottomCenter,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        notifier.clearAndFetch();
-                      },
-                      child: const Text("New plan"),
-                    ),
                   ),
                 ),
               ],
             );
           },
         )),
-        bottomNavigationBar: widget.bottomBar);
+        bottomNavigationBar:  Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: ElevatedButton(
+                onPressed: () => notifier.clearAndFetch(),
+                child: const Text("New plan"),
+              ),
+            ),
+            const DynamicBottomBar(), // your existing bottom bar
+          ],
+        ));
   }
 
   SizedBox _buildMealPlanCard(List<Recipe> mealPlan) {
-    final titleStyle = Theme.of(context).textTheme.bodyMedium?.copyWith(
+    final mediumBodyTextTheme = Theme.of(context).textTheme.bodyMedium;
+    final dayTitleStyle = Theme.of(context).textTheme.bodyLarge?.copyWith(
           fontWeight: FontWeight.bold,
         );
-    final mealInfoStyle = Theme.of(context).textTheme.bodyMedium?.copyWith(
-          fontStyle: FontStyle.italic,
-        );
+    final titleStyle = mediumBodyTextTheme?.copyWith(
+      fontWeight: FontWeight.bold,
+    );
+    final mealInfoStyle = mediumBodyTextTheme?.copyWith(
+      fontStyle: FontStyle.italic,
+    );
 
     return SizedBox(
         width: MediaQuery.of(context).size.width,
@@ -107,11 +109,8 @@ class _GeneratorPageState extends ConsumerState<GeneratorPage> {
             child: SingleChildScrollView(
           child: Column(
             children: [
-              SizedBox(height: 20),
-              Text("Day ${mealPlan.first.dayId}",
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      )),
+              SizedBox(height: 10),
+              Text("Day ${mealPlan.first.dayId}", style: dayTitleStyle),
               SizedBox(height: 10),
               Column(
                   children: mealPlan.map((recipe) {
@@ -145,7 +144,7 @@ class _GeneratorPageState extends ConsumerState<GeneratorPage> {
       image: NetworkImage(imgUrl ?? ""),
       placeholder: loadingImage,
       imageErrorBuilder: (context, error, stackTrace) {
-        // fallback when the network image fails
+        // Placeholder when the network image fails
         return Image(
             image: placeholderImage,
             width: 200,

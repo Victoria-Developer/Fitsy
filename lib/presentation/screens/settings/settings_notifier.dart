@@ -11,11 +11,11 @@ class SettingsNotifier extends AsyncNotifier<Settings> {
   late Settings _originalUserData;
   late Settings userData;
   bool isDataSaved = true;
-  bool hasDataChanged = false;
 
   @override
   Future<Settings> build() async {
-    final (repo, settings) = await ref.read(localSettingsRepositoryProvider.future);
+    final (repo, settings) =
+        await ref.read(localSettingsRepositoryProvider.future);
     _settingsRepo = repo;
     _originalUserData = settings;
     userData = Settings();
@@ -60,7 +60,7 @@ class SettingsNotifier extends AsyncNotifier<Settings> {
     _originalUserData.copyWith(userData);
     _settingsRepo.saveSettings(userData);
     isDataSaved = true;
-    hasDataChanged = true;
+    userData = Settings()..copyWith(_originalUserData);
     state = AsyncData(userData);
   }
 

@@ -1,4 +1,4 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 class NavRoute {
   NavRoute({required this.path, required this.name, this.icon});

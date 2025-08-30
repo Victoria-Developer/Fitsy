@@ -11,7 +11,7 @@ class GeneratorNotifier extends AsyncNotifier<List<List<Recipe>>> {
   late LocalRecipesRepository _localRecipesRepo;
   late RemoteRecipesRepository _remoteRecipesRepo;
   late Settings _settings;
-  late SettingsNotifier _settingsNotifier;
+  bool hasSettingsChanged = false;
 
   @override
   Future<List<List<Recipe>>> build() async {
@@ -20,8 +20,15 @@ class GeneratorNotifier extends AsyncNotifier<List<List<Recipe>>> {
     _localRecipesRepo = localRepo;
     _remoteRecipesRepo = ref.read(remoteRecipesRepositoryProvider);
 
-    _settingsNotifier = await ref.read(settingsProvider.notifier);
-    _settings = _settingsNotifier.userData;
+    _settings = await ref.read(settingsProvider.future);
+
+    ref.listen(settingsProvider, (prev, next) {
+      final data = next.value;
+      if (data != null && prev != next) {
+        hasSettingsChanged = true;
+        _settings = data;
+      }
+    });
 
     return recipes.isEmpty
         ? await _fetchMealPlans()
@@ -29,7 +36,6 @@ class GeneratorNotifier extends AsyncNotifier<List<List<Recipe>>> {
   }
 
   Future<List<List<Recipe>>> _fetchMealPlans() async {
-    _settingsNotifier.hasDataChanged = false;
     final newPlans = await _remoteRecipesRepo.fetchMeals(
         _settings.days, _settings.calories, _settings.budget, _settings.useAI);
     final plans = _groupRecipesByDayId(newPlans);
@@ -51,12 +57,9 @@ class GeneratorNotifier extends AsyncNotifier<List<List<Recipe>>> {
   }
 
   void clearAndFetch() async {
+    hasSettingsChanged = false;
     state = const AsyncLoading();
     await fetchNewMealPlans();
-  }
-
-  bool hasSettingsDataChanged() {
-    return _settingsNotifier.hasDataChanged;
   }
 }
 

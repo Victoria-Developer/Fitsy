@@ -1,235 +1,150 @@
 import 'package:fitsy/domain/models/settings.dart';
-import 'package:fitsy/presentation/navigation/app_navigator.dart';
 import 'package:fitsy/presentation/screens/settings/settings_notifier.dart';
-import 'package:fitsy/presentation/widgets/dynamic_bottom_bar.dart';
+import 'package:fitsy/presentation/widgets/decorated_drop_down_list.dart';
+import 'package:fitsy/presentation/widgets/warning_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../domain/enums/activity.dart';
 import '../../../domain/enums/gender.dart';
-import '../../widgets/outlined_text_field.dart';
+import '../../widgets/dynamic_bottom_bar.dart';
+import '../../navigation/routes.dart';
+import '../../widgets/numeric_text_field.dart';
 
 class SettingsPage extends ConsumerStatefulWidget {
-  const SettingsPage({super.key, this.onOnboardingComplete, this.bottomBar});
-
-  final void Function()? onOnboardingComplete;
-
-  final DynamicBottomBar? bottomBar;
+  const SettingsPage({super.key});
 
   @override
-  ConsumerState<SettingsPage> createState() => _OptionsPageState();
+  ConsumerState<SettingsPage> createState() => _SettingsPageState();
 }
 
-class _OptionsPageState extends ConsumerState<SettingsPage> {
+class _SettingsPageState extends ConsumerState<SettingsPage> {
   final daysList = List.generate(7, (index) => index + 1);
-  late TextEditingController ageController;
-  late TextEditingController weightController;
-  late TextEditingController heightController;
-  late TextEditingController budgetController;
-  late Settings userData;
-  late SettingsNotifier notifier;
 
   @override
   void initState() {
     super.initState();
-    ageController = TextEditingController();
-    weightController = TextEditingController();
-    heightController = TextEditingController();
-    budgetController = TextEditingController();
-  }
-
-  @override
-  void dispose() {
-    ageController.dispose();
-    weightController.dispose();
-    heightController.dispose();
-    budgetController.dispose();
-    super.dispose();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Reset settings to original each time user opens the page
+      final notifier = ref.read(settingsProvider.notifier);
+      if (!notifier.isDataSaved) notifier.reset();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final settingsAsync = ref.watch(settingsProvider);
+    final notifier = ref.read(settingsProvider.notifier);
 
     return settingsAsync.when(
       loading: () => const CircularProgressIndicator(),
       error: (e, st) => const Text("Error happened while loading settings."),
       data: (userData) {
-        this.userData = userData;
-        notifier = ref.read(settingsProvider.notifier);
-        return _buildMainContent();
+        final content = _buildMainContent(userData, notifier);
+        final saveButtonTextTheme =
+            Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                );
+
+        return Scaffold(
+            body: SafeArea(
+              child: Column(
+                children: [
+                  WarningWidget(
+                      isShown: !notifier.isDataSaved,
+                      message: "Don’t forget to save!"),
+                  Expanded(
+                    child: ListView.separated(
+                      padding: const EdgeInsets.only(top: 25, bottom: 10),
+                      itemCount: content.length,
+                      itemBuilder: (context, index) =>
+                          Center(child: content[index]),
+                      separatorBuilder: (context, index) =>
+                          const SizedBox(height: 17),
+                    ),
+                  ),
+                  Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Wrap(
+                          spacing: 7,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          direction: Axis.vertical,
+                          children: [
+                            ElevatedButton(
+                              onPressed: () =>
+                                  onSave(userData.isFirstLaunch, notifier),
+                              child: Text("Save", style: saveButtonTextTheme),
+                            )
+                          ])),
+                ],
+              ),
+            ),
+            bottomNavigationBar:
+                userData.isFirstLaunch ? null : const DynamicBottomBar());
       },
     );
   }
 
-  Widget _buildMainContent() {
-    // Reset main content each time user navigates to another screen
-    // to prevent showing unsaved settings
-    ref.listen(navigationProvider, (prev, next) {
-      notifier.reset();
-    });
-
-    ageController.text = userData.age.toString();
-    weightController.text = userData.weight.toString();
-    heightController.text = userData.height.toString();
-    budgetController.text = userData.budget.toString();
-
-    final widgets = <Widget>[
-      _wrap([
-        const Text('Use AI for menu plans: '),
-        Switch(
-          value: userData.useAI,
-          activeColor: Colors.cyan,
-          onChanged: (bool value) {
-            setState(() => notifier.setUseAI(value));
-          },
-        ),
-      ]),
-      _wrap([
-        const Text('Meal plan for: '),
-        _buildDropDownList(
-          userData.days,
-          daysList,
-          (value) => notifier.setDays(value),
-          (value) => value.toString(),
-        ),
-        const Text('days'),
-      ]),
-      _wrap([
-        const Text("Gender: "),
-        _buildDropDownList(
-          userData.gender,
-          Gender.values,
-          (value) => notifier.setGender(value),
-          (value) => value.name,
-        ),
-      ]),
-      _wrap([
-        const Text("Exercises intensity: "),
-        _buildDropDownList(
-          userData.activity,
-          Activity.values,
-          (value) => notifier.setActivity(value),
-          (value) => value.name,
-        ),
-      ]),
-      _buildNumericTextField('Age:', notifier.setAge, ageController),
-      _buildNumericTextField(
-          'Weight (kg):', notifier.setWeight, weightController),
-      _buildNumericTextField(
-          'Height (cm):', notifier.setHeight, heightController),
-      _buildNumericTextField(
-          'Budget per day (usd):', notifier.setBudget, budgetController),
-    ];
-
-    return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: ListView.separated(
-                padding: const EdgeInsets.only(top: 60, bottom: 10),
-                itemCount: widgets.length,
-                itemBuilder: (context, index) => Center(child: widgets[index]),
-                separatorBuilder: (context, index) =>
-                    const SizedBox(height: 17),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: _buildSubmitButton(),
-            ),
-          ],
-        ),
-      ),
-      bottomNavigationBar: widget.bottomBar,
-    );
+  onSave(bool isFirstLaunch, SettingsNotifier notifier) {
+    notifier.saveSettings();
+    if (isFirstLaunch) {
+      context.go(generatorRoute.path);
+    }
   }
 
-  Widget _wrap(List<Widget> children) => Wrap(
-      crossAxisAlignment: WrapCrossAlignment.center,
-      direction: Axis.horizontal,
-      spacing: 15, // <-- Spacing between children
-      children: children);
-
-  Widget _buildNumericTextField(String label, ValueChanged<int> onChanged,
-      TextEditingController? controller) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        SizedBox(
-          width: 100,
-          child: Text(label),
+  List<Widget> _buildMainContent(
+          Settings userData, SettingsNotifier notifier) =>
+      <Widget>[
+        Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
+            direction: Axis.horizontal,
+            spacing: 15,
+            children: [
+              const Text('Use AI for menu plans: '),
+              Switch(
+                value: userData.useAI,
+                activeColor: Colors.cyan,
+                onChanged: (bool value) {
+                  setState(() => notifier.setUseAI(value));
+                },
+              )
+            ]),
+        DecoratedDropDownList(
+          label: "Days: ",
+          value: userData.days,
+          items: daysList,
+          onChanged: (value) => notifier.setDays(value),
+          itemToString: (value) => value.toString(),
         ),
-        const SizedBox(width: 10),
-        SizedBox(
-          width: 80,
-          child: OutlinedTextField(
-              controller: controller,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              onEdit: (value) => onChanged(int.parse(value))),
+        DecoratedDropDownList(
+          label: "Gender: ",
+          value: userData.gender,
+          items: Gender.values,
+          onChanged: (value) => notifier.setGender(value),
+          itemToString: (value) => value.name,
         ),
-      ],
-    );
-  }
-
-  Container _buildDropDownList<T>(
-    T listValue,
-    List<T> list,
-    void Function(T) onChanged,
-    String Function(T) toString,
-  ) {
-    return Container(
-        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-        decoration: BoxDecoration(
-            color: Colors.white, borderRadius: BorderRadius.circular(10)),
-        child: DropdownButton<T>(
-          style: Theme.of(context).textTheme.bodyMedium,
-          value: listValue,
-          items: list.map<DropdownMenuItem<T>>((T value) {
-            return DropdownMenuItem<T>(
-              value: value,
-              child: Text(toString(value),
-                  style: Theme.of(context).textTheme.bodyMedium),
-            );
-          }).toList(),
-          onChanged: (T? value) {
-            if (value != null) {
-              onChanged(value);
-            }
-          },
-          dropdownColor: Colors.white,
-          underline: const SizedBox.shrink(),
-          iconEnabledColor: Colors.black,
-        ));
-  }
-
-  Widget _buildSubmitButton() {
-    final isFirstLaunch = userData.isFirstLaunch;
-    return Wrap(
-        spacing: 7,
-        crossAxisAlignment: WrapCrossAlignment.center,
-        direction: Axis.vertical,
-        children: [
-          if (!notifier.isDataSaved)
-            Text("You've changed settings. Please, save.",
-                style: TextStyle(
-                  color: Colors.red,
-                )),
-          ElevatedButton(
-            onPressed: () {
-              notifier.saveSettings();
-              if (isFirstLaunch) {
-                print("call in settings");
-                widget.onOnboardingComplete?.call();
-              }
-            },
-            child: Text(isFirstLaunch ? "Next" : "Save",
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    )),
-          )
-        ]);
-  }
+        DecoratedDropDownList(
+            label: "Exercises intensity: ",
+            value: userData.activity,
+            items: Activity.values,
+            onChanged: (value) => notifier.setActivity(value),
+            itemToString: (value) => value.name),
+        NumericTextField(
+            label: 'Age:',
+            onChanged: notifier.setAge,
+            initialValue: userData.age.toString()),
+        NumericTextField(
+            label: 'Weight (kg):',
+            onChanged: notifier.setWeight,
+            initialValue: userData.weight.toString()),
+        NumericTextField(
+            label: 'Height (cm):',
+            onChanged: notifier.setHeight,
+            initialValue: userData.height.toString()),
+        NumericTextField(
+            label: 'Budget per day (usd):',
+            onChanged: notifier.setBudget,
+            initialValue: userData.budget.toString()),
+      ];
 }
